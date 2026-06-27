@@ -1,0 +1,7 @@
+*
+!.gitignore
+!train.py
+!recognize.py
+!haarcascade_frontalface_default.xml
+# trainer.yml dikecualikan - client harus train model sendiri sesuai data siswa mereka
+# dataset/ dikecualikan - berisi foto wajah (data biometrik)
