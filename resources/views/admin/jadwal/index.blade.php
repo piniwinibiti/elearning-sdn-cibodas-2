@@ -210,8 +210,16 @@
             mapelSelect.innerHTML = '<option value="">Loading...</option>';
 
             fetch(`/admin/jadwal/guru-mapels/${guruId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request gagal');
+                    return response.json();
+                })
                 .then(data => {
+                    if (!data.length) {
+                        mapelSelect.innerHTML = '<option value="">-- Guru ini belum ada mapel --</option>';
+                        return;
+                    }
+
                     mapelSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
                     data.forEach(m => {
                         const option = document.createElement('option');
@@ -220,6 +228,9 @@
                         if (currentMapel === m) option.selected = true;
                         mapelSelect.appendChild(option);
                     });
+                })
+                .catch(() => {
+                    mapelSelect.innerHTML = '<option value="">-- Gagal memuat mapel --</option>';
                 });
         }
 
