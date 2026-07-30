@@ -260,12 +260,62 @@
 
     <div id="main-content" class="min-h-screen pt-24 bg-gray-50 transition-all duration-300">
         <div class="p-6">
+
+            @if (session('success'))
+                <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200 dark:bg-gray-800 dark:text-green-400 dark:border-green-800" role="alert" aria-live="polite">
+                    <span class="font-medium">Berhasil!</span> {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('warning'))
+                <div class="p-4 mb-4 text-sm text-amber-800 rounded-lg bg-amber-50 border border-amber-200 dark:bg-gray-800 dark:text-amber-400 dark:border-amber-800" role="alert" aria-live="polite">
+                    <span class="font-medium">Perhatian!</span> {{ session('warning') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200 dark:bg-gray-800 dark:text-red-400 dark:border-red-800" role="alert" aria-live="polite">
+                    <span class="font-medium">Gagal!</span> {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200 dark:bg-gray-800 dark:text-red-400 dark:border-red-800" role="alert" aria-live="polite">
+                    <span class="font-medium">Periksa kembali isian berikut:</span>
+                    <ul class="list-disc pl-5 mt-1.5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @yield('content')
         </div>
     </div>
 
     <!-- Flowbite JS -->
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+
+    @if (session('open_modal'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modalId = @json(session('open_modal'));
+            var modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+
+            // Flowbite v3 mengekspos Modal secara global lewat bundle CDN.
+            if (typeof Modal !== 'undefined') {
+                new Modal(modalEl, { backdrop: 'static' }).show();
+                return;
+            }
+
+            // Fallback: klik tombol pemicunya.
+            var trigger = document.querySelector('[data-modal-toggle="' + modalId + '"]');
+            if (trigger) trigger.click();
+        });
+    </script>
+    @endif
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

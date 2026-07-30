@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Materi;
-use App\Models\Mapel;
+use App\Http\Requests\BulkDestroyMateriRequest;
+use App\Http\Requests\StoreMateriRequest;
+use App\Http\Requests\UpdateMateriRequest;
 use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\Materi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,16 +47,8 @@ class MateriController extends Controller
         return view('guru.materi.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreMateriRequest $request)
     {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'id_kelas' => 'required|string|max:255',
-            'mata_pelajaran' => 'required|string|max:255',
-            'type' => 'required|in:pdf,video',
-            'file_materi' => 'required|file|mimes:pdf,mp4,mkv|max:20480', // Max 20MB
-        ]);
-
         $filePath = $request->file('file_materi')->store('materis', 'public');
 
         Materi::create([
@@ -68,17 +63,9 @@ class MateriController extends Controller
         return redirect()->route('guru.materi.index')->with('success', 'Materi berhasil ditambahkan');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateMateriRequest $request, $id)
     {
-        $materi = Materi::findOrFail($id);
-
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'id_kelas' => 'required|string|max:255',
-            'mata_pelajaran' => 'required|string|max:255',
-            'type' => 'required|in:pdf,video',
-            'file_materi' => 'nullable|file|mimes:pdf,mp4,mkv|max:20480',
-        ]);
+        $materi = Materi::where('guru_id', auth()->user()->guru->id)->findOrFail($id);
 
         $data = [
             'judul' => $request->judul,
@@ -102,24 +89,19 @@ class MateriController extends Controller
 
     public function destroy($id)
     {
-        $materi = Materi::findOrFail($id);
-        
+        $materi = Materi::where('guru_id', auth()->user()->guru->id)->findOrFail($id);
+
         if ($materi->file_path && Storage::disk('public')->exists($materi->file_path)) {
             Storage::disk('public')->delete($materi->file_path);
         }
-        
+
         $materi->delete();
 
         return redirect()->route('guru.materi.index')->with('success', 'Materi berhasil dihapus');
     }
 
-    public function bulkDestroy(Request $request)
+    public function bulkDestroy(BulkDestroyMateriRequest $request)
     {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:materis,id'
-        ]);
-
         $guruId = auth()->user()->guru->id;
         // Pastikan hanya bisa menghapus materinya sendiri
         $materis = Materi::where('guru_id', $guruId)->whereIn('id', $request->ids)->get();
@@ -131,13 +113,14 @@ class MateriController extends Controller
             $materi->delete();
         }
 
-        return redirect()->route('guru.materi.index')->with('success', count($materis) . ' Materi berhasil dihapus secara massal.');
+        return redirect()->route('guru.materi.index')->with('success', count($materis).' Materi berhasil dihapus secara massal.');
     }
 
     public function indexSiswa()
     {
         $siswaKelas = auth()->user()->siswa->id_kelas;
         $materis = Materi::where('id_kelas', $siswaKelas)->latest()->get();
+
         return view('siswa.materi.index', compact('materis'));
     }
 }

@@ -3,18 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Jadwal;
+use App\Http\Requests\StoreJadwalRequest;
+use App\Http\Requests\UpdateJadwalRequest;
 use App\Models\Guru;
+use App\Models\GuruMapel;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
-use App\Models\GuruMapel;
+use Illuminate\Http\Request;
 
 class JadwalController extends Controller
 {
     public function getGuruMapels($id)
     {
         $mapels = GuruMapel::where('guru_id', $id)->pluck('nama_mapel');
+
         return response()->json($mapels);
     }
 
@@ -24,10 +27,10 @@ class JadwalController extends Controller
         $selectedGuru = $request->get('guru_id');
 
         $jadwals = Jadwal::with('guru.user')
-            ->when($selectedKelas, function($q) use ($selectedKelas) {
+            ->when($selectedKelas, function ($q) use ($selectedKelas) {
                 return $q->where('id_kelas', $selectedKelas);
             })
-            ->when($selectedGuru, function($q) use ($selectedGuru) {
+            ->when($selectedGuru, function ($q) use ($selectedGuru) {
                 return $q->where('guru_id', $selectedGuru);
             })
             ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu')")
@@ -41,36 +44,18 @@ class JadwalController extends Controller
         return view('admin.jadwal.index', compact('jadwals', 'gurus', 'kelasOptions', 'mapelOptions', 'selectedKelas', 'selectedGuru'));
     }
 
-    public function store(Request $request)
+    public function store(StoreJadwalRequest $request)
     {
-        $request->validate([
-            'guru_id' => 'required|exists:gurus,id',
-            'id_kelas' => 'required|string',
-            'nama_mapel' => 'required|string',
-            'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required|after:jam_mulai',
-        ]);
-
-        Jadwal::create($request->all());
+        Jadwal::create($request->validated());
 
         return back()->with('success', 'Jadwal pelajaran berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateJadwalRequest $request, $id)
     {
         $jadwal = Jadwal::findOrFail($id);
 
-        $request->validate([
-            'guru_id' => 'required|exists:gurus,id',
-            'id_kelas' => 'required|string',
-            'nama_mapel' => 'required|string',
-            'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required|after:jam_mulai',
-        ]);
-
-        $jadwal->update($request->all());
+        $jadwal->update($request->validated());
 
         return back()->with('success', 'Jadwal pelajaran berhasil diperbarui.');
     }

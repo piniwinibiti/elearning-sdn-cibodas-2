@@ -453,34 +453,45 @@
     async function captureSamples() {
         statusEl.textContent = 'Memindai Wajah... (Jangan Berpindah)';
         statusEl.classList.add('text-blue-600', 'animate-pulse');
-        
+
         sampleCount = 0;
         const interval = setInterval(async () => {
             sampleCount++;
-            
+
             const ctx = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
+
             const imageData = canvas.toDataURL('image/jpeg', 0.8);
-            
+
             const percent = (sampleCount / maxSamples) * 100;
             progressBar.style.width = percent + '%';
             countEl.textContent = `${sampleCount} / ${maxSamples} Sampel`;
 
             try {
-                await fetch('{{ route('face.register') }}', {
+                const response = await fetch('{{ route('face.register') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         image: imageData,
                         sample_count: sampleCount
                     })
                 });
+
+                if (response.status === 422) {
+                    const data = await response.json();
+                    const first = Object.values(data.errors ?? {})[0]?.[0];
+                    clearInterval(interval);
+                    statusEl.classList.remove('text-blue-600', 'animate-pulse');
+                    statusEl.classList.add('text-red-600');
+                    statusEl.textContent = first ?? 'Gagal merekam sample wajah. Coba lagi.';
+                    return;
+                }
             } catch (err) {
                 console.error('Failed to send sample:', err);
             }

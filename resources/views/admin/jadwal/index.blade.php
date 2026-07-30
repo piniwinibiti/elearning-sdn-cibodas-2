@@ -6,12 +6,6 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola jadwal mengajar guru per hari dan waktu.</p>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-    {{ session('success') }}
-</div>
-@endif
-
 <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
     <form action="{{ route('admin.jadwal.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         <select name="kelas" onchange="this.form.submit()" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -91,39 +85,45 @@
                         <select name="guru_id" id="guru_select_tambah" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">-- Pilih Guru --</option>
                             @foreach($gurus as $g)
-                                <option value="{{ $g->id }}">{{ $g->user->nama_lengkap }} ({{ $g->nip }})</option>
+                                <option value="{{ $g->id }}" {{ old('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->user->nama_lengkap }} ({{ $g->nip }})</option>
                             @endforeach
                         </select>
+                        <x-input-error name="guru_id" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas</label>
                         <select name="id_kelas" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             @foreach($kelasOptions as $kls)
-                                <option value="{{ $kls }}">Kelas {{ $kls }}</option>
+                                <option value="{{ $kls }}" {{ old('id_kelas') == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
                             @endforeach
                         </select>
+                        <x-input-error name="id_kelas" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mapel</label>
                         <select name="nama_mapel" id="mapel_select_tambah" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">-- Pilih Guru Dulu --</option>
                         </select>
+                        <x-input-error name="nama_mapel" />
                     </div>
                     <div class="col-span-2">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Hari</label>
                         <select name="hari" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $h)
-                                <option value="{{ $h }}">{{ $h }}</option>
+                                <option value="{{ $h }}" {{ old('hari') == $h ? 'selected' : '' }}>{{ $h }}</option>
                             @endforeach
                         </select>
+                        <x-input-error name="hari" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jam Mulai</label>
-                        <input type="time" name="jam_mulai" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="time" name="jam_mulai" value="{{ old('jam_mulai') }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <x-input-error name="jam_mulai" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jam Selesai</label>
-                        <input type="time" name="jam_selesai" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="time" name="jam_selesai" value="{{ old('jam_selesai') }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <x-input-error name="jam_selesai" />
                     </div>
                 </div>
                 <button type="submit" class="text-white w-full inline-flex items-center justify-center bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
@@ -152,39 +152,45 @@
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Pilih Guru</label>
                         <select name="guru_id" required class="guru-select-edit w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-target="mapel-select-edit-{{ $j->id }}" data-current="{{ $j->nama_mapel }}">
                             @foreach($gurus as $g)
-                                <option value="{{ $g->id }}" {{ $j->guru_id == $g->id ? 'selected' : '' }}>{{ $g->user->nama_lengkap }}</option>
+                                <option value="{{ $g->id }}" {{ old('guru_id', $j->guru_id) == $g->id ? 'selected' : '' }}>{{ $g->user->nama_lengkap }}</option>
                             @endforeach
                         </select>
+                        <x-input-error name="guru_id" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas</label>
                         <select name="id_kelas" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             @foreach($kelasOptions as $kls)
-                                <option value="{{ $kls }}" {{ $j->id_kelas == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
+                                <option value="{{ $kls }}" {{ old('id_kelas', $j->id_kelas) == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
                             @endforeach
                         </select>
+                        <x-input-error name="id_kelas" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mapel</label>
                         <select name="nama_mapel" id="mapel-select-edit-{{ $j->id }}" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="{{ $j->nama_mapel }}">{{ $j->nama_mapel }}</option>
                         </select>
+                        <x-input-error name="nama_mapel" />
                     </div>
                     <div class="col-span-2">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Hari</label>
                         <select name="hari" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $h)
-                                <option value="{{ $h }}" {{ $j->hari == $h ? 'selected' : '' }}>{{ $h }}</option>
+                                <option value="{{ $h }}" {{ old('hari', $j->hari) == $h ? 'selected' : '' }}>{{ $h }}</option>
                             @endforeach
                         </select>
+                        <x-input-error name="hari" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jam Mulai</label>
-                        <input type="time" name="jam_mulai" value="{{ substr($j->jam_mulai, 0, 5) }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="time" name="jam_mulai" value="{{ old('jam_mulai', substr($j->jam_mulai, 0, 5)) }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <x-input-error name="jam_mulai" />
                     </div>
                     <div class="col-span-1">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jam Selesai</label>
-                        <input type="time" name="jam_selesai" value="{{ substr($j->jam_selesai, 0, 5) }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="time" name="jam_selesai" value="{{ old('jam_selesai', substr($j->jam_selesai, 0, 5)) }}" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <x-input-error name="jam_selesai" />
                     </div>
                 </div>
                 <button type="submit" class="text-white w-full inline-flex items-center justify-center bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">

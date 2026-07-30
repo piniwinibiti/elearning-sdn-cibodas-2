@@ -2,29 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAbsensiManualRequest;
+use App\Http\Requests\StoreAbsensiSiswaRequest;
 use App\Models\Absensi;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Jadwal;
 use App\Services\PythonRunner;
 
 class AbsensiController extends Controller
 {
     public function index()
     {
-        $user  = auth()->user();
+        $user = auth()->user();
         $siswa = $user->siswa;
-        
+
         $today = now()->toDateString();
-        
+
         $daysMap = [
             'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
+            'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu',
         ];
         $hariIni = $daysMap[now()->format('l')];
         $nowTime = now()->toTimeString();
 
         // 1. Cek Jadwal Aktif
-        $activeJadwal = \App\Models\Jadwal::where('id_kelas', $siswa->id_kelas)
+        $activeJadwal = Jadwal::where('id_kelas', $siswa->id_kelas)
             ->where('hari', $hariIni)
             ->where('jam_mulai', '<=', $nowTime)
             ->where('jam_selesai', '>=', $nowTime)
@@ -42,30 +43,31 @@ class AbsensiController extends Controller
         return view('siswa.absensi.index', compact('activeJadwal', 'sudahAbsenMapel'));
     }
 
-    public function store(Request $request)
+    public function store(StoreAbsensiSiswaRequest $request)
     {
-        $request->validate([
-            'image' => 'required|string',
-        ]);
+        $request->validated();
 
-        $imageParts  = explode(";base64,", $request->image);
+        $imageParts = explode(';base64,', $request->image);
         $imageBase64 = base64_decode($imageParts[1]);
 
-        $fileName = 'temp_face_' . time() . '.jpg';
-        $tempDir  = storage_path('app/public/temp');
-        $tempPath = $tempDir . DIRECTORY_SEPARATOR . $fileName;
+        $fileName = 'temp_face_'.time().'.jpg';
+        $tempDir = storage_path('app/public/temp');
+        $tempPath = $tempDir.DIRECTORY_SEPARATOR.$fileName;
 
-        if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
         file_put_contents($tempPath, $imageBase64);
 
         $scriptPath = storage_path('app/public/recognize.py');
-        $output     = PythonRunner::run($scriptPath, [$tempPath]);
+        $output = PythonRunner::run($scriptPath, [$tempPath]);
 
-        if (!$output) {
+        if (! $output) {
             @unlink($tempPath);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menjalankan pengenalan wajah. Periksa log Laravel untuk detail.'
+                'message' => 'Gagal menjalankan pengenalan wajah. Periksa log Laravel untuk detail.',
             ], 500);
         }
 
@@ -74,16 +76,17 @@ class AbsensiController extends Controller
 
             $absensi = Absensi::updateOrCreate(
                 ['siswa_id' => auth()->user()->siswa->id, 'tanggal' => now()->toDateString()],
-                ['jam_masuk' => now()->toTimeString(), 'status' => 'hadir', 'foto_bukti' => 'temp/' . $fileName]
+                ['jam_masuk' => now()->toTimeString(), 'status' => 'hadir', 'foto_bukti' => 'temp/'.$fileName]
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Absensi berhasil! Wajah dikenali dengan tingkat kecocokan ' . $output['confidence'] . '%',
+                'message' => 'Absensi berhasil! Wajah dikenali dengan tingkat kecocokan '.$output['confidence'].'%',
             ]);
         }
 
         @unlink($tempPath);
+
         return response()->json([
             'success' => false,
             'message' => $output['message'] ?? 'Wajah tidak dikenali atau tingkat kecocokan rendah. Silakan coba lagi.',
@@ -91,17 +94,13 @@ class AbsensiController extends Controller
     }
 
     /** Input absensi manual oleh guru */
-    public function storeManual(Request $request)
+    public function storeManual(StoreAbsensiManualRequest $request)
     {
-        $request->validate([
-            'siswa_id' => 'required|exists:siswas,id',
-            'status'   => 'required|in:hadir,izin,sakit,alpha',
-            'tanggal'  => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         $absensi = Absensi::updateOrCreate(
-            ['siswa_id' => $request->siswa_id, 'tanggal' => $request->tanggal],
-            ['jam_masuk' => now()->toTimeString(), 'status' => $request->status]
+            ['siswa_id' => $validated['siswa_id'], 'tanggal' => $validated['tanggal']],
+            ['jam_masuk' => now()->toTimeString(), 'status' => $validated['status']]
         );
 
         return back()->with('success', 'Absensi berhasil dicatat secara manual.');
@@ -110,8 +109,19 @@ class AbsensiController extends Controller
     /** Hapus data absensi oleh guru */
     public function destroy($id)
     {
-        $absensi = Absensi::findOrFail($id);
+        $guru = auth()->user()->guru;
+
+        $absensi = Absensi::where('id', $id)
+            ->where(function ($q) use ($guru) {
+                // Wali kelas: seluruh absensi kelasnya.
+                $q->where('id_kelas', $guru->id_kelas_wali)
+                  // Guru bidang: absensi pada mapel yang diampunya.
+                    ->orWhereIn('mata_pelajaran', $guru->mapels()->pluck('nama_mapel'));
+            })
+            ->firstOrFail();
+
         $absensi->delete();
+
         return back()->with('success', 'Data absensi berhasil dihapus.');
     }
 }

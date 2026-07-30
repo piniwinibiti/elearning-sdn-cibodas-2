@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tugas;
+use App\Http\Requests\BulkDestroyTugasRequest;
+use App\Http\Requests\GradeTugasRequest;
+use App\Http\Requests\StoreTugasRequest;
+use App\Http\Requests\UpdateTugasRequest;
+use App\Http\Requests\UploadJawabanTugasRequest;
 use App\Models\JawabanTugas;
-use App\Models\Mapel;
 use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\Tugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -40,17 +45,8 @@ class TugasController extends Controller
         return view('guru.tugas.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreTugasRequest $request)
     {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'id_kelas' => 'required|string|max:255',
-            'mata_pelajaran' => 'required|string|max:255',
-            'instruksi' => 'required|string',
-            'deadline' => 'required|date',
-            'file_tugas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,zip|max:12288', // Max 12MB
-        ]);
-
         $data = [
             'guru_id' => auth()->user()->guru->id,
             'id_kelas' => $request->id_kelas,
@@ -69,18 +65,9 @@ class TugasController extends Controller
         return redirect()->route('guru.tugas.index')->with('success', 'Tugas berhasil ditambahkan');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateTugasRequest $request, $id)
     {
-        $tugas = Tugas::findOrFail($id);
-
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'id_kelas' => 'required|string|max:255',
-            'mata_pelajaran' => 'required|string|max:255',
-            'instruksi' => 'required|string',
-            'deadline' => 'required|date',
-            'file_tugas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,zip|max:12288',
-        ]);
+        $tugas = Tugas::where('guru_id', auth()->user()->guru->id)->findOrFail($id);
 
         $data = [
             'judul' => $request->judul,
@@ -105,7 +92,7 @@ class TugasController extends Controller
 
     public function destroy($id)
     {
-        $tugas = Tugas::findOrFail($id);
+        $tugas = Tugas::where('guru_id', auth()->user()->guru->id)->findOrFail($id);
         if ($tugas->file_tugas) {
             Storage::disk('public')->delete($tugas->file_tugas);
         }
@@ -114,13 +101,8 @@ class TugasController extends Controller
         return redirect()->route('guru.tugas.index')->with('success', 'Tugas berhasil dihapus');
     }
 
-    public function bulkDestroy(Request $request)
+    public function bulkDestroy(BulkDestroyTugasRequest $request)
     {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:tugas,id'
-        ]);
-
         $guruId = auth()->user()->guru->id;
         // Pastikan hanya bisa menghapus tugasnya sendiri
         $tugasList = Tugas::where('guru_id', $guruId)->whereIn('id', $request->ids)->get();
@@ -132,7 +114,7 @@ class TugasController extends Controller
             $tugas->delete();
         }
 
-        return redirect()->route('guru.tugas.index')->with('success', count($tugasList) . ' Tugas berhasil dihapus secara massal.');
+        return redirect()->route('guru.tugas.index')->with('success', count($tugasList).' Tugas berhasil dihapus secara massal.');
     }
 
     public function indexSiswa(Request $request)
@@ -156,7 +138,7 @@ class TugasController extends Controller
         }
 
         $tugasList = $query->latest()->paginate(12)->withQueryString();
-        
+
         return view('siswa.tugas.index', compact('tugasList'));
     }
 
@@ -165,18 +147,14 @@ class TugasController extends Controller
         $tugas = Tugas::findOrFail($id);
         $siswaId = auth()->user()->siswa->id;
         $jawaban = JawabanTugas::where('tugas_id', $id)->where('siswa_id', $siswaId)->first();
-        
+
         return view('siswa.tugas.show', compact('tugas', 'jawaban'));
     }
 
-    public function uploadJawaban(Request $request, $id)
+    public function uploadJawaban(UploadJawabanTugasRequest $request, $id)
     {
-        $request->validate([
-            'file_jawaban' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:10240', // Max 10MB
-        ]);
-
         $tugas = Tugas::findOrFail($id);
-        
+
         if (now() > $tugas->deadline) {
             return back()->with('error', 'Waktu pengumpulan tugas sudah habis.');
         }
@@ -195,28 +173,24 @@ class TugasController extends Controller
     {
         $guruId = auth()->user()->guru->id;
         $tugas = Tugas::where('id', $id)->where('guru_id', $guruId)->firstOrFail();
-        
+
         // Eager load jawaban and assigned siswa
         $jawabans = JawabanTugas::with('siswa.user')->where('tugas_id', $id)->get();
 
         return view('guru.tugas.submissions', compact('tugas', 'jawabans'));
     }
 
-    public function grade(Request $request, $jawaban_id)
+    public function grade(GradeTugasRequest $request, $jawaban_id)
     {
-        $request->validate([
-            'nilai' => 'required|numeric|min:0|max:100',
-        ]);
-
         $jawaban = JawabanTugas::findOrFail($jawaban_id);
-        
+
         // Verify this belongs to current guru's tugas
         if ($jawaban->tugas->guru_id !== auth()->user()->guru->id) {
             abort(403, 'Unauthorized action.');
         }
 
         $jawaban->update([
-            'nilai' => $request->nilai
+            'nilai' => $request->nilai,
         ]);
 
         return back()->with('success', 'Nilai berhasil disimpan!');

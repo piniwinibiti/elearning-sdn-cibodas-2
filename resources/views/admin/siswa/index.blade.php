@@ -6,22 +6,6 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambah dan lihat daftar siswa.</p>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-  {{ session('success') }}
-</div>
-@endif
-
-@if($errors->any())
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-  <ul class="list-disc pl-5">
-      @foreach($errors->all() as $error)
-      <li>{{ $error }}</li>
-      @endforeach
-  </ul>
-</div>
-@endif
-
 <div class="flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
     <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">Daftar Siswa</h2>
     <button data-modal-target="crud-modal-siswa" data-modal-toggle="crud-modal-siswa" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center" type="button">
@@ -51,7 +35,17 @@
             <form action="{{ route('admin.siswa.store') }}" method="POST" class="p-4 md:p-5" id="form-tambah-siswa">
                 @csrf
                 <div id="face-samples-container"></div>
-                
+
+                @php
+                    $faceErrors = collect($errors->keys())
+                        ->filter(fn ($k) => str_starts_with($k, 'face_samples'))
+                        ->flatMap(fn ($k) => $errors->get($k))
+                        ->unique()
+                        ->values()
+                        ->all();
+                @endphp
+                <x-input-error :messages="$faceErrors" />
+
                 <div class="grid gap-6 mb-4 grid-cols-1 md:grid-cols-2">
                     <!-- Kolom Kiri: Form Data Siswa -->
                     <div class="space-y-4">
@@ -65,10 +59,11 @@
                                         <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
                                     </svg>
                                 </div>
-                                <input type="text" id="nama_lengkap" name="nama_lengkap" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                                <input type="text" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
                             </div>
+                            <x-input-error name="nama_lengkap" />
                         </div>
-                        
+
                         <div>
                             <label for="nis" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">NIS (Username)</label>
                             <div class="relative">
@@ -77,8 +72,10 @@
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 0V4a2 2 0 0 1 2-2h3m0 0v2m0 0h2m-2-2h-2m-2 0H2a2 2 0 0 0-2 2v1"/>
                                     </svg>
                                 </div>
-                                <input type="text" id="nis" name="nis" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                                <input type="text" id="nis" name="nis" value="{{ old('nis') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">Hanya angka, tanpa huruf atau spasi. NIS otomatis digunakan sebagai username.</p>
+                            <x-input-error name="nis" />
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -86,9 +83,10 @@
                                 <label for="id_kelas" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas</label>
                                 <select id="id_kelas" name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
                                     @foreach(\App\Models\Kelas::orderBy('nama_kelas')->pluck('nama_kelas') as $kelas)
-                                        <option value="{{ $kelas }}">{{ $kelas }}</option>
+                                        <option value="{{ $kelas }}" {{ old('id_kelas') == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
                                     @endforeach
                                 </select>
+                                <x-input-error name="id_kelas" />
                             </div>
 
                             <div>
@@ -100,6 +98,7 @@
                                         <svg class="eye-off-icon w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                     </button>
                                 </div>
+                                <x-input-error name="password" />
                             </div>
                         </div>
                     </div>
@@ -259,24 +258,37 @@
                                     @csrf
                                     @method('PUT')
                                     <div id="edit-face-samples-container-{{ $siswa->id }}"></div>
+                                    @php
+                                        $editFaceErrors = collect($errors->keys())
+                                            ->filter(fn ($k) => str_starts_with($k, 'face_samples'))
+                                            ->flatMap(fn ($k) => $errors->get($k))
+                                            ->unique()
+                                            ->values()
+                                            ->all();
+                                    @endphp
+                                    <x-input-error :messages="$editFaceErrors" />
                                     <div class="grid gap-6 mb-4 grid-cols-1 md:grid-cols-2">
                                         <div class="space-y-4">
                                             <h4 class="text-md font-semibold text-gray-900 dark:text-white border-b pb-2 dark:border-gray-600">Informasi Siswa</h4>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Lengkap</label>
-                                            <input type="text" name="nama_lengkap" value="{{ $siswa->user->nama_lengkap }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                                            <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $siswa->user->nama_lengkap) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                                            <x-input-error name="nama_lengkap" />
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">NIS / Username</label>
-                                            <input type="text" name="nis" value="{{ $siswa->nis }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                                            <input type="text" name="nis" value="{{ old('nis', $siswa->nis) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                                            <p class="text-xs text-gray-500 mt-1">Hanya angka. Nilai ini juga menjadi username login siswa.</p>
+                                            <x-input-error name="nis" />
                                         </div>
                                         <div class="col-span-2 sm:col-span-1">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas</label>
                                             <select name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
                                                 @foreach(\App\Models\Kelas::orderBy('nama_kelas')->pluck('nama_kelas') as $kelas)
-                                                    <option value="{{ $kelas }}" {{ $siswa->id_kelas == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
+                                                    <option value="{{ $kelas }}" {{ old('id_kelas', $siswa->id_kelas) == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
                                                 @endforeach
                                             </select>
+                                            <x-input-error name="id_kelas" />
                                         </div>
                                         <div class="col-span-2 sm:col-span-1">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sandi Baru (Kosongkan jika tetap)</label>
@@ -287,6 +299,7 @@
                                                     <svg class="eye-off-icon w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                                 </button>
                                             </div>
+                                            <x-input-error name="password" />
                                         </div>
                                         </div>
 

@@ -45,23 +45,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div id="alert-success" class="flex items-center p-4 mb-4 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800 rounded-lg shadow-sm animate-pulse-once" role="alert">
-        <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-        </svg>
-        <div class="ms-3 text-sm font-medium">
-            <span class="font-bold">Berhasil!</span> {{ session('success') }}
-        </div>
-        <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-green-50 text-green-500 rounded-lg focus:ring-2 focus:ring-green-400 p-1.5 hover:bg-green-200 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700" data-dismiss-target="#alert-success" aria-label="Close">
-          <span class="sr-only">Dismiss</span>
-          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-          </svg>
-        </button>
-    </div>
-    @endif
-
     <!-- Main Content Card -->
     <div class="bg-white border border-gray-100 rounded-3xl shadow-xl dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
         <!-- Search & Actions Bar -->
@@ -153,7 +136,8 @@
                                 <div class="p-8 space-y-5">
                                     <div>
                                         <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kode Mapel</label>
-                                        <input type="text" name="kode" value="{{ $mapel->kode }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-mono font-bold" placeholder="MISAL: MTK" required>
+                                        <input type="text" name="kode" value="{{ old('kode', $mapel->kode) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-mono font-bold" placeholder="MISAL: MTK" required>
+                                        <x-input-error name="kode" />
                                     </div>
                                     <div>
                                         <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nama Mata Pelajaran</label>
@@ -161,8 +145,9 @@
                                             <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                                             </div>
-                                            <input type="text" name="nama_mapel" value="{{ $mapel->nama_mapel }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 pl-12 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-semibold" required>
+                                            <input type="text" name="nama_mapel" value="{{ old('nama_mapel', $mapel->nama_mapel) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 pl-12 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-semibold" required>
                                         </div>
+                                        <x-input-error name="nama_mapel" />
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <button type="submit" class="flex-1 text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 focus:ring-4 focus:ring-amber-200 font-bold rounded-2xl text-base px-6 py-4 text-center transition-all shadow-lg active:scale-95">Simpan Perubahan</button>
@@ -228,9 +213,10 @@
             <div class="p-8 space-y-5">
                 <div>
                     <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-none">Kode Mapel</label>
-                    <input type="text" name="kode" placeholder="Misal: MTK" 
+                    <input type="text" name="kode" placeholder="Misal: MTK" value="{{ old('kode') }}"
                         class="bg-gray-50 border-2 border-transparent border-b-gray-200 text-gray-900 text-base font-bold rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:border-b-gray-500 dark:focus:border-blue-600 uppercase transition-all shadow-inner font-mono" required>
                     <p class="mt-2 text-xs text-gray-400">Kode unik singkat untuk mata pelajaran.</p>
+                    <x-input-error name="kode" />
                 </div>
                 <div>
                     <label class="block mb-3 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-none">Nama Mata Pelajaran</label>
@@ -238,10 +224,11 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         </div>
-                        <input type="text" name="nama_mapel" placeholder="Misal: MATEMATIKA" 
+                        <input type="text" name="nama_mapel" placeholder="Misal: MATEMATIKA" value="{{ old('nama_mapel') }}"
                             class="bg-gray-50 border-2 border-transparent border-b-gray-200 text-gray-900 text-base font-bold rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 block w-full p-6 pl-12 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:border-b-gray-500 dark:focus:border-blue-600 uppercase transition-all shadow-inner" required>
                     </div>
                     <p class="mt-2 text-xs text-gray-400">Masukkan nama lengkap mata pelajaran.</p>
+                    <x-input-error name="nama_mapel" />
                 </div>
                 
                 <div class="flex items-center space-x-3 pt-2">
@@ -257,28 +244,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-close alert after 5 seconds
-        const alert = document.getElementById('alert-success');
-        if (alert) {
-            setTimeout(() => {
-                alert.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-                setTimeout(() => alert.remove(), 500);
-            }, 5000);
-        }
-    });
-</script>
-<style>
-    @keyframes pulse-once {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
-    }
-    .animate-pulse-once {
-        animation: pulse-once 0.5s ease-out 1;
-    }
-</style>
-@endpush
 @endsection

@@ -8,18 +8,6 @@
     <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Detail Tugas</h1>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-  {{ session('success') }}
-</div>
-@endif
-
-@if(session('error'))
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-  {{ session('error') }}
-</div>
-@endif
-
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Tugas Info -->
     <div class="lg:col-span-2">
@@ -86,6 +74,7 @@
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_jawaban">{{ $jawaban ? 'Unggah Ulang File (Opsional)' : 'Unggah File Jawaban' }}</label>
                         <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_jawaban" name="file_jawaban" type="file" required>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Word, PDF, JPG, PNG (Maks 10MB)</p>
+                        <x-input-error name="file_jawaban" />
                     </div>
                     <button type="submit" class="w-full text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">{{ $jawaban ? 'Perbarui Jawaban' : 'Serahkan Tugas' }}</button>
                 </form>

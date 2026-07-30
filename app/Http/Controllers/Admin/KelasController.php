@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreKelasRequest;
+use App\Http\Requests\UpdateKelasRequest;
 use App\Models\Kelas;
 
 class KelasController extends Controller
@@ -11,28 +12,21 @@ class KelasController extends Controller
     public function index()
     {
         $kelasList = Kelas::orderBy('nama_kelas')->get();
+
         return view('admin.kelas.index', compact('kelasList'));
     }
 
-    public function store(Request $request)
+    public function store(StoreKelasRequest $request)
     {
-        $request->validate([
-            'nama_kelas' => 'required|string|max:50|unique:kelas,nama_kelas'
-        ]);
-
-        Kelas::create(['nama_kelas' => $request->nama_kelas]);
+        Kelas::create($request->validated());
 
         return back()->with('success', 'Kelas berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateKelasRequest $request, $id)
     {
-        $request->validate([
-            'nama_kelas' => 'required|string|max:50|unique:kelas,nama_kelas,' . $id
-        ]);
-
         $kelas = Kelas::findOrFail($id);
-        $kelas->update(['nama_kelas' => $request->nama_kelas]);
+        $kelas->update($request->validated());
 
         return back()->with('success', 'Kelas berhasil diperbarui.');
     }

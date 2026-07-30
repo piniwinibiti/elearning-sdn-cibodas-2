@@ -446,17 +446,28 @@
 
             // Send to server
             try {
-                await fetch('{{ route('face.register') }}', {
+                const response = await fetch('{{ route('face.register') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         image: imageData,
                         sample_count: sampleCount
                     })
                 });
+
+                if (response.status === 422) {
+                    const data = await response.json();
+                    const first = Object.values(data.errors ?? {})[0]?.[0];
+                    clearInterval(interval);
+                    statusEl.classList.remove('text-blue-600', 'animate-pulse');
+                    statusEl.classList.add('text-red-600');
+                    statusEl.textContent = first ?? 'Gagal merekam sample wajah. Coba lagi.';
+                    return;
+                }
             } catch (err) {
                 console.error('Failed to send sample:', err);
             }
@@ -599,13 +610,19 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({ image: imageData })
             });
-            
-            const result = await response.json();
-            
+
+            let result = await response.json();
+
+            if (response.status === 422) {
+                const first = Object.values(result.errors ?? {})[0]?.[0];
+                result = { success: false, message: first ?? result.message ?? 'Data tidak valid.' };
+            }
+
             if (result.success) {
                 absIconSuccess.classList.remove('hidden');
                 document.getElementById('absensi-result-title').textContent = 'Sukses!';

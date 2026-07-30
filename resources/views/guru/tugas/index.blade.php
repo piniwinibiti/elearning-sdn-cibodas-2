@@ -6,22 +6,6 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Daftar tugas yang telah Anda buat untuk siswa.</p>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-  {{ session('success') }}
-</div>
-@endif
-
-@if($errors->any())
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-  <ul class="list-disc pl-5">
-      @foreach($errors->all() as $error)
-      <li>{{ $error }}</li>
-      @endforeach
-  </ul>
-</div>
-@endif
-
 <div class="flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
     <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">Daftar Tugas</h2>
     <button data-modal-target="crud-modal-tugas" data-modal-toggle="crud-modal-tugas" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center" type="button">
@@ -52,10 +36,11 @@
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/></svg>
                             </div>
-                            <input type="text" id="judul" name="judul" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Kerjakan LKS Hal. 10" required>
+                            <input type="text" id="judul" name="judul" value="{{ old('judul') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Kerjakan LKS Hal. 10" required>
                         </div>
+                        <x-input-error name="judul" />
                     </div>
-                    
+
                     @if($guru->id_kelas_wali)
                         {{-- GURU KELAS: Lock Kelas, Open Mapel --}}
                         <div class="col-span-2 sm:col-span-1">
@@ -66,31 +51,34 @@
                         <div class="col-span-2 sm:col-span-1">
                             <label for="mata_pelajaran" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                             <select id="mata_pelajaran" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Mapel</option>
+                                <option value="" disabled {{ old('mata_pelajaran') ? '' : 'selected' }}>Pilih Mapel</option>
                                 @foreach($mapelOptions as $mapel)
-                                    <option value="{{ $mapel }}">{{ $mapel }}</option>
+                                    <option value="{{ $mapel }}" {{ old('mata_pelajaran') == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="mata_pelajaran" />
                         </div>
                     @else
                         {{-- GURU SPESIALIS: Open Kelas, Lock Mapel --}}
                         <div class="col-span-2 sm:col-span-1">
                             <label for="id_kelas" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas Tujuan</label>
                             <select id="id_kelas" name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Kelas</option>
+                                <option value="" disabled {{ old('id_kelas') ? '' : 'selected' }}>Pilih Kelas</option>
                                 @foreach($kelasOptions as $kls)
-                                    <option value="{{ $kls }}">{{ $kls }}</option>
+                                    <option value="{{ $kls }}" {{ old('id_kelas') == $kls ? 'selected' : '' }}>{{ $kls }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="id_kelas" />
                         </div>
                         <div class="col-span-2 sm:col-span-1">
                             <label for="mata_pelajaran" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                             <select id="mata_pelajaran" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Mapel</option>
+                                <option value="" disabled {{ old('mata_pelajaran') ? '' : 'selected' }}>Pilih Mapel</option>
                                 @foreach($mapelOptions as $mapel)
-                                    <option value="{{ $mapel }}">{{ $mapel }}</option>
+                                    <option value="{{ $mapel }}" {{ old('mata_pelajaran') == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="mata_pelajaran" />
                         </div>
                     @endif
 
@@ -100,19 +88,22 @@
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
                             </div>
-                            <input type="datetime-local" id="deadline" name="deadline" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            <input type="datetime-local" id="deadline" name="deadline" value="{{ old('deadline') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                         </div>
+                        <x-input-error name="deadline" />
                     </div>
 
                     <div class="col-span-2">
                         <label for="instruksi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detail Instruksi</label>
-                        <textarea id="instruksi" name="instruksi" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Tulis instruksi lengkap tugas di sini..." required></textarea>
+                        <textarea id="instruksi" name="instruksi" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Tulis instruksi lengkap tugas di sini..." required>{{ old('instruksi') }}</textarea>
+                        <x-input-error name="instruksi" />
                     </div>
 
                     <div class="col-span-2">
                         <label for="file_tugas" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Lampiran File (Opsional)</label>
                         <input type="file" id="file_tugas" name="file_tugas" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PDF, Word, Image, atau ZIP (Maks 12MB)</p>
+                        <x-input-error name="file_tugas" />
                     </div>
                 </div>
                 <button type="submit" class="text-white inline-flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -228,8 +219,9 @@
                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/></svg>
                                 </div>
-                                <input type="text" name="judul" value="{{ $tugas->judul }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                                <input type="text" name="judul" value="{{ old('judul', $tugas->judul) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
                             </div>
+                            <x-input-error name="judul" />
                         </div>
                         @if($guru->id_kelas_wali)
                             {{-- GURU KELAS: Lock Kelas, Open Mapel --}}
@@ -242,9 +234,10 @@
                                 <label for="mata_pelajaran_{{ $tugas->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                                 <select id="mata_pelajaran_{{ $tugas->id }}" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                     @foreach($mapelOptions as $mapel)
-                                        <option value="{{ $mapel }}" {{ $tugas->mata_pelajaran == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
+                                        <option value="{{ $mapel }}" {{ old('mata_pelajaran', $tugas->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                     @endforeach
                                 </select>
+                                <x-input-error name="mata_pelajaran" />
                             </div>
                         @else
                             {{-- GURU SPESIALIS: Open Kelas, Lock Mapel --}}
@@ -252,26 +245,30 @@
                                 <label for="id_kelas_{{ $tugas->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas Tujuan</label>
                                 <select id="id_kelas_{{ $tugas->id }}" name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                     @foreach($kelasOptions as $kls)
-                                        <option value="{{ $kls }}" {{ $tugas->id_kelas == $kls ? 'selected' : '' }}>{{ $kls }}</option>
+                                        <option value="{{ $kls }}" {{ old('id_kelas', $tugas->id_kelas) == $kls ? 'selected' : '' }}>{{ $kls }}</option>
                                     @endforeach
                                 </select>
+                                <x-input-error name="id_kelas" />
                             </div>
                             <div class="col-span-2 sm:col-span-1">
                                 <label for="mata_pelajaran_{{ $tugas->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                                 <select id="mata_pelajaran_{{ $tugas->id }}" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                     @foreach($mapelOptions as $mapel)
-                                        <option value="{{ $mapel }}" {{ $tugas->mata_pelajaran == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
+                                        <option value="{{ $mapel }}" {{ old('mata_pelajaran', $tugas->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                     @endforeach
                                 </select>
+                                <x-input-error name="mata_pelajaran" />
                             </div>
                         @endif
                         <div class="col-span-2 sm:col-span-1">
                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Batas Pengumpulan</label>
-                            <input type="datetime-local" name="deadline" value="{{ date('Y-m-d\TH:i', strtotime($tugas->deadline)) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                            <input type="datetime-local" name="deadline" value="{{ old('deadline', date('Y-m-d\TH:i', strtotime($tugas->deadline))) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                            <x-input-error name="deadline" />
                         </div>
                         <div class="col-span-2">
                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Instruksi</label>
-                            <textarea name="instruksi" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>{{ $tugas->instruksi }}</textarea>
+                            <textarea name="instruksi" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>{{ old('instruksi', $tugas->instruksi) }}</textarea>
+                            <x-input-error name="instruksi" />
                         </div>
                         <div class="col-span-2">
                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Lampiran File</label>
@@ -285,6 +282,7 @@
                             @endif
                             <input type="file" name="file_tugas" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pilih file baru untuk mengganti lampiran lama.</p>
+                            <x-input-error name="file_tugas" />
                         </div>
                     </div>
                     <button type="submit" class="text-white w-full inline-flex items-center justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

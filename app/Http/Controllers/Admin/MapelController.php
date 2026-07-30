@@ -3,49 +3,35 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreMapelRequest;
+use App\Http\Requests\UpdateMapelRequest;
 use App\Models\Mapel;
+use Illuminate\Http\Request;
 
 class MapelController extends Controller
 {
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $mapels = Mapel::when($search, function($query, $search) {
+        $mapels = Mapel::when($search, function ($query, $search) {
             return $query->where('nama_mapel', 'like', "%{$search}%")
-                        ->orWhere('kode', 'like', "%{$search}%");
+                ->orWhere('kode', 'like', "%{$search}%");
         })->orderBy('nama_mapel')->get();
-        
+
         return view('admin.mapel.index', compact('mapels', 'search'));
     }
 
-    public function store(Request $request)
+    public function store(StoreMapelRequest $request)
     {
-        $request->validate([
-            'kode' => 'required|string|max:20|unique:mapels,kode',
-            'nama_mapel' => 'required|string|max:100|unique:mapels,nama_mapel'
-        ]);
-
-        Mapel::create([
-            'kode' => strtoupper($request->kode),
-            'nama_mapel' => $request->nama_mapel
-        ]);
+        Mapel::create($request->validated());
 
         return back()->with('success', 'Mata Pelajaran berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateMapelRequest $request, $id)
     {
-        $request->validate([
-            'kode' => 'required|string|max:20|unique:mapels,kode,' . $id,
-            'nama_mapel' => 'required|string|max:100|unique:mapels,nama_mapel,' . $id
-        ]);
-
         $mapel = Mapel::findOrFail($id);
-        $mapel->update([
-            'kode' => strtoupper($request->kode),
-            'nama_mapel' => $request->nama_mapel
-        ]);
+        $mapel->update($request->validated());
 
         return back()->with('success', 'Mata Pelajaran berhasil diperbarui.');
     }

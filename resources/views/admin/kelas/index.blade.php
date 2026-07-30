@@ -14,21 +14,6 @@
     </div>
 </div>
 
-@if(session('success'))
-    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 border border-green-200 dark:border-green-800 alert-dismissible fade show" role="alert">
-        <span class="font-medium">Berhasil!</span> {{ session('success') }}
-    </div>
-@endif
-@if($errors->any())
-    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 border border-red-200 dark:border-red-800 alert-dismissible fade show" role="alert">
-        <ul class="list-disc pl-5 mt-1">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
 <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -82,7 +67,8 @@
                             <div class="p-4 md:p-5 space-y-4">
                                 <div>
                                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Kelas</label>
-                                    <input type="text" name="nama_kelas" value="{{ $kelas->nama_kelas }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                    <input type="text" name="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                    <x-input-error name="nama_kelas" />
                                 </div>
                             </div>
                             <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-700">
@@ -124,7 +110,8 @@
             <div class="p-4 md:p-5 space-y-4">
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Kelas</label>
-                    <input type="text" name="nama_kelas" placeholder="Misal: 1A" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                    <input type="text" name="nama_kelas" placeholder="Misal: 1A" value="{{ old('nama_kelas') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                    <x-input-error name="nama_kelas" />
                 </div>
             </div>
             <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-700">

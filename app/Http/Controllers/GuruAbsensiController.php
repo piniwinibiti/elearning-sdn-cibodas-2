@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Jadwal;
-use App\Models\Siswa;
+use App\Http\Requests\GetStudentsRequest;
+use App\Http\Requests\ScannerProcessRequest;
+use App\Http\Requests\StoreGuruAbsensiRequest;
 use App\Models\Absensi;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
-use App\Models\GuruMapel;
-use Illuminate\Support\Facades\DB;
+use App\Models\Siswa;
 use App\Services\PythonRunner;
+use Illuminate\Http\Request;
 
 class GuruAbsensiController extends Controller
 {
@@ -18,11 +19,11 @@ class GuruAbsensiController extends Controller
     {
         $guru = auth()->user()->guru;
         $isWali = $guru->isWali();
-        
+
         // Days map for Indoneisan Hari
         $daysMap = [
             'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
+            'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu',
         ];
         $hariIni = $daysMap[now()->format('l')];
 
@@ -39,19 +40,19 @@ class GuruAbsensiController extends Controller
 
         // Options
         $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        
+
         if ($isWali) {
             // Wali Kelas can pick any subject for their class
             $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
         } else {
             // Bidang Guru can only pick their assigned subjects
             $mapelOptions = $guru->mapels()->pluck('nama_mapel');
-            
+
             // Fallback: Jika relasi kosong (misal data lama), coba parse dari string mapel_ajar
-            if ($mapelOptions->isEmpty() && !empty($guru->mapel_ajar) && $guru->mapel_ajar !== '-') {
-                $mapelOptions = collect(explode(',', $guru->mapel_ajar))->map(fn($m) => trim($m))->filter();
+            if ($mapelOptions->isEmpty() && ! empty($guru->mapel_ajar) && $guru->mapel_ajar !== '-') {
+                $mapelOptions = collect(explode(',', $guru->mapel_ajar))->map(fn ($m) => trim($m))->filter();
             }
-            
+
             // AUTO-SELECT: If subject teacher has exactly 1 subject, use it as default
             if ($mapelOptions->count() === 1) {
                 $selectedMapel = $selectedMapel ?? $mapelOptions->first();
@@ -68,7 +69,7 @@ class GuruAbsensiController extends Controller
             $siswas = Siswa::with('user')
                 ->where('id_kelas', $selectedKelas)
                 ->get();
-                
+
             if ($selectedMapel) {
                 $rekapAbsensi = Absensi::where('id_kelas', $selectedKelas)
                     ->where('mata_pelajaran', $selectedMapel)
@@ -79,32 +80,28 @@ class GuruAbsensiController extends Controller
         }
 
         return view('guru.absensi.index', compact(
-            'guru', 'isWali', 'selectedKelas', 'selectedMapel', 
+            'guru', 'isWali', 'selectedKelas', 'selectedMapel',
             'tanggal', 'kelasOptions', 'mapelOptions', 'siswas', 'rekapAbsensi', 'jadwalHariIni'
         ));
     }
 
-    public function getStudents(Request $request)
+    public function getStudents(GetStudentsRequest $request)
     {
-        $kelas = $request->kelas;
+        $kelas = $request->validated('kelas');
         $students = Siswa::with('user')->where('id_kelas', $kelas)->get();
+
         return response()->json($students);
     }
 
-    public function store(Request $request)
+    public function store(StoreGuruAbsensiRequest $request)
     {
-        $request->validate([
-            'kelas' => 'required|string',
-            'mapel' => 'required|string',
-            'tanggal' => 'required|date',
-            'absensi' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
-        $kelas = $request->kelas;
-        $mapel = $request->mapel;
-        $tanggal = $request->tanggal;
+        $kelas = $validated['kelas'];
+        $mapel = $validated['mapel'];
+        $tanggal = $validated['tanggal'];
 
-        foreach ($request->absensi as $siswaId => $data) {
+        foreach ($validated['absensi'] as $siswaId => $data) {
             Absensi::updateOrCreate(
                 [
                     'siswa_id' => $siswaId,
@@ -120,35 +117,34 @@ class GuruAbsensiController extends Controller
             );
         }
 
-        return back()->with('success', 'Absensi berhasil disimpan untuk ' . $mapel . ' di Kelas ' . $kelas);
+        return back()->with('success', 'Absensi berhasil disimpan untuk '.$mapel.' di Kelas '.$kelas);
     }
 
-    public function scannerProcess(Request $request)
+    public function scannerProcess(ScannerProcessRequest $request)
     {
-        $request->validate([
-            'image' => 'required|string',
-            'kelas' => 'required|string',
-            'mapel' => 'required|string',
-        ]);
+        $request->validated();
 
-        $imageParts  = explode(";base64,", $request->image);
+        $imageParts = explode(';base64,', $request->image);
         $imageBase64 = base64_decode($imageParts[1]);
 
-        $fileName = 'guru_scan_' . time() . '.jpg';
-        $tempDir  = storage_path('app/public/temp');
-        $tempPath = $tempDir . DIRECTORY_SEPARATOR . $fileName;
+        $fileName = 'guru_scan_'.time().'.jpg';
+        $tempDir = storage_path('app/public/temp');
+        $tempPath = $tempDir.DIRECTORY_SEPARATOR.$fileName;
 
-        if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
         file_put_contents($tempPath, $imageBase64);
 
         $scriptPath = storage_path('app/public/recognize.py');
-        $output     = PythonRunner::run($scriptPath, [$tempPath]);
+        $output = PythonRunner::run($scriptPath, [$tempPath]);
 
-        if (!$output || !isset($output['success']) || !$output['success']) {
+        if (! $output || ! isset($output['success']) || ! $output['success']) {
             @unlink($tempPath);
+
             return response()->json([
                 'success' => false,
-                'message' => $output['message'] ?? 'Wajah tidak dikenali.'
+                'message' => $output['message'] ?? 'Wajah tidak dikenali.',
             ], 400);
         }
 
@@ -156,11 +152,12 @@ class GuruAbsensiController extends Controller
             $siswaId = $output['id'];
             $siswa = Siswa::with('user')->find($siswaId);
 
-            if (!$siswa || $siswa->id_kelas != $request->kelas) {
+            if (! $siswa || $siswa->id_kelas != $request->kelas) {
                 @unlink($tempPath);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Siswa dikenali (' . ($siswa->user->nama_lengkap ?? 'Unknown') . '), tapi bukan di kelas ini.'
+                    'message' => 'Siswa dikenali ('.($siswa->user->nama_lengkap ?? 'Unknown').'), tapi bukan di kelas ini.',
                 ], 400);
             }
 
@@ -174,21 +171,22 @@ class GuruAbsensiController extends Controller
                 [
                     'status' => 'hadir',
                     'jam_masuk' => now()->toTimeString(),
-                    'foto_bukti' => 'temp/' . $fileName
+                    'foto_bukti' => 'temp/'.$fileName,
                 ]
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Absensi berhasil! ' . $siswa->user->nama_lengkap . ' hadir.',
-                'siswa' => ['nama' => $siswa->user->nama_lengkap]
+                'message' => 'Absensi berhasil! '.$siswa->user->nama_lengkap.' hadir.',
+                'siswa' => ['nama' => $siswa->user->nama_lengkap],
             ]);
         }
 
         @unlink($tempPath);
+
         return response()->json([
             'success' => false,
-            'message' => 'Tingkat kecocokan rendah (' . $output['confidence'] . '%). Silakan coba lagi.'
+            'message' => 'Tingkat kecocokan rendah ('.$output['confidence'].'%). Silakan coba lagi.',
         ], 400);
     }
 }

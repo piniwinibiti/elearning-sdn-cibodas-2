@@ -96,6 +96,7 @@
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_jawaban">Upload Lembar Jawaban (PDF / Gambar) <span class="text-red-500">*</span></label>
                 <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_jawaban_help" id="file_jawaban" name="file_jawaban" type="file" accept=".pdf,image/*" required>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="file_jawaban_help">Pastikan foto jelas dan bisa dibaca oleh guru. Maksimal 5MB.</p>
+                <x-input-error name="file_jawaban" />
             </div>
         </div>
         @else
@@ -103,27 +104,29 @@
         @foreach($ujian->soals as $idx => $soal)
         <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 mb-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4"><span class="font-bold mr-2">{{ $idx + 1 }}.</span> {{ $soal->pertanyaan }}</h3>
-            
+
             <div class="space-y-3">
                 <label class="flex items-center p-3 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
-                    <input type="radio" value="A" name="jawaban_{{ $soal->id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
+                    <input type="radio" value="A" name="jawaban[{{ $soal->id }}]" {{ old('jawaban.'.$soal->id) === 'A' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
                     <span class="ml-3 font-medium cursor-pointer w-full"><span class="mr-2 font-bold text-gray-500">A.</span> {{ $soal->opsi_a }}</span>
                 </label>
                 <label class="flex items-center p-3 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
-                    <input type="radio" value="B" name="jawaban_{{ $soal->id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
+                    <input type="radio" value="B" name="jawaban[{{ $soal->id }}]" {{ old('jawaban.'.$soal->id) === 'B' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
                     <span class="ml-3 font-medium cursor-pointer w-full"><span class="mr-2 font-bold text-gray-500">B.</span> {{ $soal->opsi_b }}</span>
                 </label>
                 <label class="flex items-center p-3 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
-                    <input type="radio" value="C" name="jawaban_{{ $soal->id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
+                    <input type="radio" value="C" name="jawaban[{{ $soal->id }}]" {{ old('jawaban.'.$soal->id) === 'C' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
                     <span class="ml-3 font-medium cursor-pointer w-full"><span class="mr-2 font-bold text-gray-500">C.</span> {{ $soal->opsi_c }}</span>
                 </label>
                 <label class="flex items-center p-3 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
-                    <input type="radio" value="D" name="jawaban_{{ $soal->id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
+                    <input type="radio" value="D" name="jawaban[{{ $soal->id }}]" {{ old('jawaban.'.$soal->id) === 'D' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" required>
                     <span class="ml-3 font-medium cursor-pointer w-full"><span class="mr-2 font-bold text-gray-500">D.</span> {{ $soal->opsi_d }}</span>
                 </label>
             </div>
+            <x-input-error :messages="$errors->get('jawaban.'.$soal->id)" />
         </div>
         @endforeach
+        <x-input-error :messages="$errors->get('jawaban')" />
         @endif
 
         <div class="flex justify-end mt-6">

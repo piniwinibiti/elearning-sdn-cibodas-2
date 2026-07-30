@@ -46,14 +46,18 @@
                     <select name="target_kelas" required class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">-- Pilih Kelas Tujuan --</option>
                         @foreach($kelasOptions as $ko)
-                            <option value="{{ $ko->nama_kelas }}">Kelas {{ $ko->nama_kelas }}</option>
+                            <option value="{{ $ko->nama_kelas }}" {{ old('target_kelas') == $ko->nama_kelas ? 'selected' : '' }}>Kelas {{ $ko->nama_kelas }}</option>
                         @endforeach
-                        <option value="LULUS">LULUS / ALUMNI</option>
+                        <option value="LULUS" {{ old('target_kelas') == 'LULUS' ? 'selected' : '' }}>LULUS / ALUMNI</option>
                     </select>
                     <button type="submit" onclick="return confirm('Yakin ingin memproses kenaikan kelas untuk siswa terpilih?')" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2 transition-colors">
                         Proses Kenaikan
                     </button>
                 </div>
+            </div>
+            <div class="px-4 pb-2">
+                <x-input-error name="target_kelas" />
+                <x-input-error :messages="$errors->get('siswa_ids')" />
             </div>
 
             <div class="overflow-x-auto">

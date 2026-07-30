@@ -18,5 +18,8 @@
     },
     "dependencies": {
         "flowbite": "^4.0.1"
+    },
+    "allowScripts": {
+        "esbuild@0.28.1": true
     }
 }

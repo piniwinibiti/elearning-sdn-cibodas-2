@@ -58,7 +58,8 @@
                         @csrf
                         <div class="mb-5">
                             <label for="username" class="block mb-2 text-sm font-medium text-gray-700">Username / NIS / NIP</label>
-                            <input type="text" id="username" name="username" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors shadow-sm" placeholder="Masukkan username" required />
+                            <input type="text" id="username" name="username" value="{{ old('username') }}" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors shadow-sm" placeholder="Masukkan username" required />
+                            <x-input-error name="username" />
                         </div>
                         <div class="mb-5">
                             <label for="password" class="block mb-2 text-sm font-medium text-gray-700">Password</label>
@@ -69,6 +70,7 @@
                                     <svg class="eye-off-icon w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                 </button>
                             </div>
+                            <x-input-error name="password" />
                         </div>
                         <div class="flex items-center justify-end mb-5">
                             <a href="#" class="text-sm font-medium text-blue-600 hover:underline">Lupa Password ?</a>
@@ -204,11 +206,19 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ image: dataUrl })
         })
-        .then(response => response.json())
+        .then(async (response) => {
+            const data = await response.json();
+            if (response.status === 422) {
+                const first = Object.values(data.errors ?? {})[0]?.[0];
+                return { success: false, message: first ?? data.message ?? 'Data tidak valid.' };
+            }
+            return data;
+        })
         .then(data => {
             document.getElementById('scan-laser-login').classList.add('hidden');
             if(data.success) {

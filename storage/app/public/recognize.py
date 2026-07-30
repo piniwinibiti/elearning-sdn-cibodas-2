@@ -78,7 +78,7 @@ def process_face(image_path):
     # confidence: sebenarnya adalah "distance" (jarak) - semakin KECIL semakin MIRIP
     id_siswa, confidence = recognizer.predict(gray[y:y+h, x:x+w])
 
-    if confidence < 80:
+    if confidence < 100:
         # Distance di bawah 80 dianggap cocok -> konversi ke skor persentase kemiripan
         # semakin kecil distance, semakin tinggi skor (100 - distance)
         match_confidence = round(100 - confidence, 2)

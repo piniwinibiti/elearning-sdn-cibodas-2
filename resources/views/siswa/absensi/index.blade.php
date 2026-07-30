@@ -124,11 +124,19 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ image: base64Image })
             })
-            .then(response => response.json())
+            .then(async (response) => {
+                const data = await response.json();
+                if (response.status === 422) {
+                    const first = Object.values(data.errors ?? {})[0]?.[0];
+                    return { success: false, message: first ?? data.message ?? 'Data tidak valid.' };
+                }
+                return data;
+            })
             .then(data => {
                 loading.classList.add('hidden');
                 document.getElementById('scan-laser').classList.add('hidden');

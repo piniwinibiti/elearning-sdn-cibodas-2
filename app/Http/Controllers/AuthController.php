@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FaceLoginRequest;
+use App\Http\Requests\LoginRequest;
+use App\Models\User;
+use App\Services\PythonRunner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\PythonRunner;
 
 class AuthController extends Controller
 {
@@ -13,26 +16,29 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'username' => ['required'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
             $role = auth()->user()->role;
-            if ($role === 'admin') return redirect()->route('admin.dashboard');
-            if ($role === 'guru')  return redirect()->route('guru.dashboard');
-            if ($role === 'siswa') return redirect()->route('siswa.dashboard');
+            if ($role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            if ($role === 'guru') {
+                return redirect()->route('guru.dashboard');
+            }
+            if ($role === 'siswa') {
+                return redirect()->route('siswa.dashboard');
+            }
 
             return redirect()->intended('dashboard');
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
+            'username' => 'Username atau password salah.',
         ])->onlyInput('username');
     }
 
@@ -41,35 +47,36 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 
-    public function faceLogin(Request $request)
+    public function faceLogin(FaceLoginRequest $request)
     {
-        $request->validate([
-            'image' => 'required|string',
-        ]);
+        $request->validated();
 
         // Decode Base64 image & simpan ke file temp
-        $imageParts  = explode(";base64,", $request->image);
+        $imageParts = explode(';base64,', $request->image);
         $imageBase64 = base64_decode($imageParts[1]);
 
-        $tempDir  = storage_path('app/public/temp');
-        $tempPath = $tempDir . DIRECTORY_SEPARATOR . 'face_login_' . time() . '.jpg';
+        $tempDir = storage_path('app/public/temp');
+        $tempPath = $tempDir.DIRECTORY_SEPARATOR.'face_login_'.time().'.jpg';
 
-        if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
         file_put_contents($tempPath, $imageBase64);
 
         // Jalankan Python dengan PythonRunner (aman di Windows, tidak hang)
         $scriptPath = storage_path('app/public/recognize.py');
-        $output     = PythonRunner::run($scriptPath, [$tempPath]);
+        $output = PythonRunner::run($scriptPath, [$tempPath]);
 
         @unlink($tempPath);
 
-        if (!$output) {
+        if (! $output) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menjalankan pengenalan wajah.'
+                'message' => 'Gagal menjalankan pengenalan wajah.',
             ], 500);
         }
 
@@ -78,21 +85,27 @@ class AuthController extends Controller
             isset($output['confidence']) && $output['confidence'] > 20 &&
             isset($output['user_id'])) {
 
-            $user = \App\Models\User::find($output['user_id']);
+            $user = User::find($output['user_id']);
 
             if ($user) {
                 Auth::login($user);
                 $request->session()->regenerate();
 
                 $redirectUrl = route('dashboard');
-                if ($user->role === 'admin') $redirectUrl = route('admin.dashboard');
-                if ($user->role === 'guru')  $redirectUrl = route('guru.dashboard');
-                if ($user->role === 'siswa') $redirectUrl = route('siswa.dashboard');
+                if ($user->role === 'admin') {
+                    $redirectUrl = route('admin.dashboard');
+                }
+                if ($user->role === 'guru') {
+                    $redirectUrl = route('guru.dashboard');
+                }
+                if ($user->role === 'siswa') {
+                    $redirectUrl = route('siswa.dashboard');
+                }
 
                 return response()->json([
-                    'success'  => true,
-                    'message'  => 'Login Berhasil! Selamat datang, ' . $user->nama_lengkap,
-                    'redirect' => $redirectUrl
+                    'success' => true,
+                    'message' => 'Login Berhasil! Selamat datang, '.$user->nama_lengkap,
+                    'redirect' => $redirectUrl,
                 ]);
             }
         }
@@ -100,7 +113,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => false,
             'message' => $output['message'] ?? 'Wajah tidak dikenali atau tingkat kecocokan rendah.',
-            'confidence' => $output['confidence'] ?? 0
+            'confidence' => $output['confidence'] ?? 0,
         ], 401);
     }
 }

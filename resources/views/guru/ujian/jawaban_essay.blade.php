@@ -39,22 +39,6 @@
     </div>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-    <span class="font-medium">Success!</span> {{ session('success') }}
-</div>
-@endif
-
-@if ($errors->any())
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-    <ul class="list-disc list-inside">
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
-
 <!-- Tabel Jawaban -->
 <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
@@ -95,12 +79,15 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <form action="{{ route('guru.ujian.nilai', $jawaban->id) }}" method="POST" class="flex items-center justify-end space-x-2">
+                        <form action="{{ route('guru.ujian.nilai', $jawaban->id) }}" method="POST" class="flex flex-col items-end gap-1">
                             @csrf
-                            <input type="number" name="nilai" min="0" max="100" value="{{ $jawaban->nilai }}" placeholder="Nilai (0-100)" class="w-24 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-                            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                                Simpan
-                            </button>
+                            <div class="flex items-center justify-end space-x-2">
+                                <input type="number" name="nilai" min="0" max="100" value="{{ $jawaban->nilai }}" placeholder="Nilai (0-100)" class="w-24 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                    Simpan
+                                </button>
+                            </div>
+                            <x-input-error name="nilai" />
                         </form>
                     </td>
                 </tr>

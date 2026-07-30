@@ -6,22 +6,6 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Daftar materi pembelajaran yang Anda unggah.</p>
 </div>
 
-@if(session('success'))
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-  {{ session('success') }}
-</div>
-@endif
-
-@if($errors->any())
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-  <ul class="list-disc pl-5">
-      @foreach($errors->all() as $error)
-      <li>{{ $error }}</li>
-      @endforeach
-  </ul>
-</div>
-@endif
-
 <div class="flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
     <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">Daftar Materi</h2>
     <button data-modal-target="crud-modal-materi" data-modal-toggle="crud-modal-materi" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center" type="button">
@@ -59,10 +43,11 @@
                                     <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
                                 </svg>
                             </div>
-                            <input type="text" id="judul" name="judul" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Contoh: Pengantar Matematika" required>
+                            <input type="text" id="judul" name="judul" value="{{ old('judul') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Contoh: Pengantar Matematika" required>
                         </div>
+                        <x-input-error name="judul" />
                     </div>
-                    
+
                     @if($guru->id_kelas_wali)
                         {{-- GURU KELAS: Lock Kelas, Open Mapel --}}
                         <div class="col-span-2 sm:col-span-1">
@@ -73,31 +58,34 @@
                         <div class="col-span-2 sm:col-span-1">
                             <label for="mata_pelajaran" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                             <select id="mata_pelajaran" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Mapel</option>
+                                <option value="" disabled {{ old('mata_pelajaran') ? '' : 'selected' }}>Pilih Mapel</option>
                                 @foreach($mapelOptions as $mapel)
-                                    <option value="{{ $mapel }}">{{ $mapel }}</option>
+                                    <option value="{{ $mapel }}" {{ old('mata_pelajaran') == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="mata_pelajaran" />
                         </div>
                     @else
                         {{-- GURU SPESIALIS: Open Kelas, Lock Mapel --}}
                         <div class="col-span-2 sm:col-span-1">
                             <label for="id_kelas" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas Tujuan</label>
                             <select id="id_kelas" name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Kelas</option>
+                                <option value="" disabled {{ old('id_kelas') ? '' : 'selected' }}>Pilih Kelas</option>
                                 @foreach($kelasOptions as $kls)
-                                    <option value="{{ $kls }}">{{ $kls }}</option>
+                                    <option value="{{ $kls }}" {{ old('id_kelas') == $kls ? 'selected' : '' }}>{{ $kls }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="id_kelas" />
                         </div>
                         <div class="col-span-2 sm:col-span-1">
                             <label for="mata_pelajaran" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                             <select id="mata_pelajaran" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                <option value="" disabled selected>Pilih Mapel</option>
+                                <option value="" disabled {{ old('mata_pelajaran') ? '' : 'selected' }}>Pilih Mapel</option>
                                 @foreach($mapelOptions as $mapel)
-                                    <option value="{{ $mapel }}">{{ $mapel }}</option>
+                                    <option value="{{ $mapel }}" {{ old('mata_pelajaran') == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                 @endforeach
                             </select>
+                            <x-input-error name="mata_pelajaran" />
                         </div>
                     @endif
 
@@ -111,15 +99,17 @@
                                 </svg>
                             </div>
                             <select id="type" name="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
-                                <option value="pdf">PDF Dokumen</option>
-                                <option value="video">Video (MP4/MKV)</option>
+                                <option value="pdf" {{ old('type') == 'pdf' ? 'selected' : '' }}>PDF Dokumen</option>
+                                <option value="video" {{ old('type') == 'video' ? 'selected' : '' }}>Video (MP4/MKV)</option>
                             </select>
                         </div>
+                        <x-input-error name="type" />
                     </div>
 
                     <div class="col-span-2">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_materi">Unggah File (Max 20MB)</label>
                         <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_materi" name="file_materi" type="file" required>
+                        <x-input-error name="file_materi" />
                     </div>
                 </div>
                 <button type="submit" class="text-white inline-flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -254,8 +244,9 @@
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/></svg>
                                                 </div>
-                                                <input type="text" name="judul" value="{{ $materi->judul }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
+                                                <input type="text" name="judul" value="{{ old('judul', $materi->judul) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required>
                                             </div>
+                                            <x-input-error name="judul" />
                                         </div>
                                         @if($guru->id_kelas_wali)
                                             {{-- GURU KELAS: Lock Kelas, Open Mapel --}}
@@ -268,9 +259,10 @@
                                                 <label for="mata_pelajaran_{{ $materi->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                                                 <select id="mata_pelajaran_{{ $materi->id }}" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                                     @foreach($mapelOptions as $mapel)
-                                                        <option value="{{ $mapel }}" {{ $materi->mata_pelajaran == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
+                                                        <option value="{{ $mapel }}" {{ old('mata_pelajaran', $materi->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                                     @endforeach
                                                 </select>
+                                                <x-input-error name="mata_pelajaran" />
                                             </div>
                                         @else
                                             {{-- GURU SPESIALIS: Open Kelas, Lock Mapel --}}
@@ -278,30 +270,34 @@
                                                 <label for="id_kelas_{{ $materi->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kelas Tujuan</label>
                                                 <select id="id_kelas_{{ $materi->id }}" name="id_kelas" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                                     @foreach($kelasOptions as $kls)
-                                                        <option value="{{ $kls }}" {{ $materi->id_kelas == $kls ? 'selected' : '' }}>{{ $kls }}</option>
+                                                        <option value="{{ $kls }}" {{ old('id_kelas', $materi->id_kelas) == $kls ? 'selected' : '' }}>{{ $kls }}</option>
                                                     @endforeach
                                                 </select>
+                                                <x-input-error name="id_kelas" />
                                             </div>
                                             <div class="col-span-2 sm:col-span-1">
                                                 <label for="mata_pelajaran_{{ $materi->id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran</label>
                                                 <select id="mata_pelajaran_{{ $materi->id }}" name="mata_pelajaran" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                                                     @foreach($mapelOptions as $mapel)
-                                                        <option value="{{ $mapel }}" {{ $materi->mata_pelajaran == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
+                                                        <option value="{{ $mapel }}" {{ old('mata_pelajaran', $materi->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                                                     @endforeach
                                                 </select>
+                                                <x-input-error name="mata_pelajaran" />
                                             </div>
                                         @endif
                                         <div class="col-span-2 sm:col-span-1">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipe</label>
                                             <select name="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
-                                                <option value="pdf" {{ $materi->type == 'pdf' ? 'selected' : '' }}>PDF</option>
-                                                <option value="video" {{ $materi->type == 'video' ? 'selected' : '' }}>Video</option>
+                                                <option value="pdf" {{ old('type', $materi->type) == 'pdf' ? 'selected' : '' }}>PDF</option>
+                                                <option value="video" {{ old('type', $materi->type) == 'video' ? 'selected' : '' }}>Video</option>
                                             </select>
+                                            <x-input-error name="type" />
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">File Baru (Kosongkan bila tidak diganti)</label>
                                             <input name="file_materi" type="file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-600 dark:border-gray-500">
                                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Harap upload PDF atau video max 20MB.</p>
+                                            <x-input-error name="file_materi" />
                                         </div>
                                     </div>
                                     <button type="submit" class="text-white inline-flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

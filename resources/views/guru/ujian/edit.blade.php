@@ -12,17 +12,6 @@
     </a>
 </div>
 
-@if ($errors->any())
-<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-    <span class="font-medium">Opps! Terjadi kesalahan validasi:</span>
-    <ul class="mt-1.5 list-disc list-inside">
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
-
 <form action="{{ route('guru.ujian.update', $ujian->id) }}" method="POST" id="form-ujian" enctype="multipart/form-data">
     @csrf
     @method('PUT')
@@ -35,8 +24,9 @@
             <div class="col-span-1 md:col-span-2 lg:col-span-2">
                 <label for="judul" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Judul/Mata Pelajaran <span class="text-red-500">*</span></label>
                 <input type="text" name="judul" id="judul" value="{{ old('judul', $ujian->judul) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                <x-input-error name="judul" />
             </div>
-            
+
             @if($guru->id_kelas_wali)
                 {{-- GURU KELAS: Lock Kelas, Open Mapel --}}
                 <div class="col-span-1">
@@ -51,6 +41,7 @@
                             <option value="{{ $mapel }}" {{ old('mata_pelajaran', $ujian->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                         @endforeach
                     </select>
+                    <x-input-error name="mata_pelajaran" />
                 </div>
             @else
                 {{-- GURU SPESIALIS: Open Kelas, Lock Mapel --}}
@@ -62,6 +53,7 @@
                             <option value="{{ $kls }}" {{ old('id_kelas', $ujian->id_kelas) == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
                         @endforeach
                     </select>
+                    <x-input-error name="id_kelas" />
                 </div>
                 <div>
                     <label for="mata_pelajaran" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran <span class="text-red-500">*</span></label>
@@ -70,12 +62,14 @@
                             <option value="{{ $mapel }}" {{ old('mata_pelajaran', $ujian->mata_pelajaran) == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                         @endforeach
                     </select>
+                    <x-input-error name="mata_pelajaran" />
                 </div>
             @endif
 
             <div>
                 <label for="waktu_menit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Limit Waktu (Menit) <span class="text-red-500">*</span></label>
                 <input type="number" name="waktu_menit" id="waktu_menit" min="1" value="{{ old('waktu_menit', $ujian->waktu_menit) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                <x-input-error name="waktu_menit" />
             </div>
 
             <div class="col-span-1 md:col-span-2 lg:col-span-4 mt-2">
@@ -90,6 +84,7 @@
                         <span class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Essay / Take Home (File Upload)</span>
                     </label>
                 </div>
+                <x-input-error name="tipe" />
             </div>
         </div>
     </div>
@@ -101,10 +96,12 @@
         </h3>
         <p class="text-sm text-gray-500 mb-4">Tuliskan instruksi atau soal secara lengkap. Siswa nantinya akan diminta mengunggah file gambar/PDF sebagai jawaban mereka.</p>
         <textarea name="teks_essay" id="teks_essay" rows="6" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4" placeholder="Contoh: 1. Jelaskan menurut pendapat Anda mengenai fotosintesis...">{{ old('teks_essay', $ujian->teks_essay) }}</textarea>
-        
+        <x-input-error name="teks_essay" />
+
         <div>
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_soal">File Pendukung Ujian (PDF / Gambar) <span class="text-gray-500 font-normal italic">(Opsional)</span></label>
             <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white dark:text-gray-400 focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400" id="file_soal" name="file_soal" type="file" accept=".pdf,image/*">
+            <x-input-error name="file_soal" />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pilih file materi ujian kalau ingin diubah. Abaikan jika tidak. Maksimal 5MB.</p>
             
             @if($ujian->file_soal)
@@ -144,6 +141,7 @@
             
             <div class="mb-4">
                 <textarea name="soal[{{ $index }}][pertanyaan]" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tuliskan pertanyaan di sini..." required>{{ old("soal.{$index}.pertanyaan", $soal->pertanyaan) }}</textarea>
+                <x-input-error :messages="$errors->get('soal.'.$index.'.pertanyaan')" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -152,24 +150,28 @@
                         <span class="w-6 text-center font-bold mr-2 text-gray-500">A</span> Pilihan Ganda A
                     </label>
                     <input type="text" name="soal[{{ $index }}][opsi_a]" value="{{ old("soal.{$index}.opsi_a", $soal->opsi_a) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                    <x-input-error :messages="$errors->get('soal.'.$index.'.opsi_a')" />
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white flex items-center">
                         <span class="w-6 text-center font-bold mr-2 text-gray-500">B</span> Pilihan Ganda B
                     </label>
                     <input type="text" name="soal[{{ $index }}][opsi_b]" value="{{ old("soal.{$index}.opsi_b", $soal->opsi_b) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                    <x-input-error :messages="$errors->get('soal.'.$index.'.opsi_b')" />
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white flex items-center">
                         <span class="w-6 text-center font-bold mr-2 text-gray-500">C</span> Pilihan Ganda C
                     </label>
                     <input type="text" name="soal[{{ $index }}][opsi_c]" value="{{ old("soal.{$index}.opsi_c", $soal->opsi_c) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                    <x-input-error :messages="$errors->get('soal.'.$index.'.opsi_c')" />
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white flex items-center">
                         <span class="w-6 text-center font-bold mr-2 text-gray-500">D</span> Pilihan Ganda D
                     </label>
                     <input type="text" name="soal[{{ $index }}][opsi_d]" value="{{ old("soal.{$index}.opsi_d", $soal->opsi_d) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                    <x-input-error :messages="$errors->get('soal.'.$index.'.opsi_d')" />
                 </div>
             </div>
 
@@ -183,10 +185,12 @@
                     </label>
                     @endforeach
                 </div>
+                <x-input-error :messages="$errors->get('soal.'.$index.'.jawaban_benar')" />
             </div>
         </div>
         @endforeach
     </div>
+    <x-input-error :messages="$errors->get('soal')" />
 
     <!-- Controls Bottom -->
     <div class="mt-6 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">

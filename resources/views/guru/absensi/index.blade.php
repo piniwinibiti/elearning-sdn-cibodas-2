@@ -112,7 +112,15 @@
                     <input type="hidden" name="kelas" value="{{ $selectedKelas }}">
                     <input type="hidden" name="mapel" value="{{ $selectedMapel }}">
                     <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-                    
+
+                    @if($errors->hasAny(['kelas', 'mapel', 'tanggal']))
+                        <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                            <x-input-error :messages="$errors->get('kelas')" />
+                            <x-input-error :messages="$errors->get('mapel')" />
+                            <x-input-error :messages="$errors->get('tanggal')" />
+                        </div>
+                    @endif
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -158,9 +166,11 @@
                                             </label>
                                             @endforeach
                                         </div>
+                                        <x-input-error :messages="$errors->get('absensi.'.$s->id.'.status')" class="text-center" />
                                     </td>
                                     <td class="px-4 py-4">
                                         <input type="text" name="absensi[{{ $s->id }}][keterangan]" value="{{ $rekapAbsensi[$s->id]->keterangan ?? '' }}" placeholder="Opsional..." class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                                        <x-input-error :messages="$errors->get('absensi.'.$s->id.'.keterangan')" />
                                     </td>
                                 </tr>
                                 @endforeach
@@ -269,14 +279,6 @@
             </div>
         </div>
 
-        @if(session('success'))
-        <div class="flex p-4 text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 border border-green-200 dark:border-green-800 animate-bounce" role="alert">
-            <svg class="flex-shrink-0 w-4 h-4 mt-0.5 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/></svg>
-            <div>
-                <span class="font-bold">Berhasil!</span> {{ session('success') }}
-            </div>
-        </div>
-        @endif
     </div>
 </div>
 @else
@@ -358,16 +360,22 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         image: dataUrl,
                         kelas: '{{ $selectedKelas }}',
                         mapel: '{{ $selectedMapel }}'
                     })
                 });
 
-                const data = await response.json();
+                let data = await response.json();
+
+                if (response.status === 422) {
+                    const first = Object.values(data.errors ?? {})[0]?.[0];
+                    data = { success: false, message: first ?? data.message ?? 'Data tidak valid.' };
+                }
 
                 if (data.success) {
                     resultBox.className = 'p-4 rounded-xl font-bold bg-green-100 text-green-700 flex items-center justify-center gap-3 animate-pulse';
