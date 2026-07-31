@@ -105,6 +105,7 @@ class AuthController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Login Berhasil! Selamat datang, '.$user->nama_lengkap,
+                    'confidence' => $output['confidence'],
                     'redirect' => $redirectUrl,
                 ]);
             }

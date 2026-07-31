@@ -118,6 +118,27 @@
     </div> <!-- End Login Form Container -->
 </div> <!-- End Flex Container -->
 
+<!-- Face Login Success Popup -->
+<div id="face-success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center transform transition-all scale-95 opacity-0" id="face-success-modal-box">
+        <div class="mx-auto mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+            <svg class="w-9 h-9 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1" id="face-success-modal-title">Login Berhasil!</h3>
+        <p class="text-sm text-gray-500 mb-4" id="face-success-modal-message"></p>
+
+        <div class="mb-2 flex items-center justify-between text-sm">
+            <span class="text-gray-600">Tingkat Kecocokan</span>
+            <span class="font-semibold text-green-600" id="face-success-modal-confidence-value">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+            <div id="face-success-modal-confidence-bar" class="bg-green-600 h-2.5 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+        </div>
+
+        <p class="text-xs text-gray-400" id="face-success-modal-countdown">Mengalihkan ke dashboard...</p>
+    </div>
+</div>
+
 <script>
     const video = document.getElementById('video-login');
     const canvas = document.getElementById('canvas-login');
@@ -222,12 +243,8 @@
         .then(data => {
             document.getElementById('scan-laser-login').classList.add('hidden');
             if(data.success) {
-                showStatus(data.message, "success");
                 stopCamera();
-                // Redirect on success
-                setTimeout(() => {
-                    window.location.href = data.redirect || '/dashboard';
-                }, 1000);
+                showSuccessModal(data.message, data.confidence, data.redirect || '/dashboard');
             } else {
                 showStatus(data.message, "error");
                 resetCaptureBtn();
@@ -252,6 +269,39 @@
         } else if (type === 'loading') {
             statusMsg.classList.add('bg-blue-100', 'text-blue-800');
         }
+    }
+
+    function showSuccessModal(message, confidence, redirectUrl) {
+        const modal = document.getElementById('face-success-modal');
+        const box = document.getElementById('face-success-modal-box');
+        const confidenceValue = (typeof confidence === 'number') ? confidence : 0;
+
+        document.getElementById('face-success-modal-message').textContent = message;
+        document.getElementById('face-success-modal-confidence-value').textContent = confidenceValue + '%';
+
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            box.classList.remove('scale-95', 'opacity-0');
+            box.classList.add('scale-100', 'opacity-100');
+            document.getElementById('face-success-modal-confidence-bar').style.width = confidenceValue + '%';
+        });
+
+        let secondsLeft = 3;
+        const countdownEl = document.getElementById('face-success-modal-countdown');
+        countdownEl.textContent = `Mengalihkan ke dashboard dalam ${secondsLeft}...`;
+        const countdownInterval = setInterval(() => {
+            secondsLeft -= 1;
+            if (secondsLeft <= 0) {
+                clearInterval(countdownInterval);
+                countdownEl.textContent = 'Mengalihkan...';
+            } else {
+                countdownEl.textContent = `Mengalihkan ke dashboard dalam ${secondsLeft}...`;
+            }
+        }, 1000);
+
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 3000);
     }
 
     function resetCaptureBtn() {
