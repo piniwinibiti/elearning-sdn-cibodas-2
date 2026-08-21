@@ -55,6 +55,13 @@ class AuthController extends Controller
     {
         $request->validated();
 
+        // Verifikasi 1:1 (bukan identifikasi 1:N): user mengklaim identitas lewat
+        // username lebih dulu, wajah hanya dicocokkan ke akun yang diklaim itu.
+        // Ini mencegah kasus 2 akun ter-training wajah yang sama (human error saat
+        // registrasi) menyebabkan login "nyasar" ke akun/role yang salah — hasil
+        // terburuknya jadi ditolak, bukan berhasil login sebagai orang lain.
+        $claimedUser = User::where('username', $request->username)->first();
+
         // Decode Base64 image & simpan ke file temp
         $imageParts = explode(';base64,', $request->image);
         $imageBase64 = base64_decode($imageParts[1]);
@@ -80,41 +87,46 @@ class AuthController extends Controller
             ], 500);
         }
 
+        $noMatchResponse = response()->json([
+            'success' => false,
+            'message' => 'Wajah tidak cocok dengan akun yang dimasukkan, atau tingkat kecocokan rendah.',
+            'confidence' => $output['confidence'] ?? 0,
+        ], 401);
+
+        // Tetap jalankan pengenalan wajah di atas walau username tidak ditemukan
+        // (menjaga waktu respons konsisten), tapi jangan bocorkan bahwa username
+        // tidak terdaftar — balas dengan pesan generik yang sama.
+        if (! $claimedUser) {
+            return $noMatchResponse;
+        }
+
         // Threshold diturunkan sesuai diskusi (lebih besar dari 20% match)
         if (isset($output['success']) && $output['success'] &&
             isset($output['confidence']) && $output['confidence'] > 20 &&
-            isset($output['user_id'])) {
+            isset($output['user_id']) && (int) $output['user_id'] === $claimedUser->id) {
 
-            $user = User::find($output['user_id']);
+            Auth::login($claimedUser);
+            $request->session()->regenerate();
 
-            if ($user) {
-                Auth::login($user);
-                $request->session()->regenerate();
-
-                $redirectUrl = route('dashboard');
-                if ($user->role === 'admin') {
-                    $redirectUrl = route('admin.dashboard');
-                }
-                if ($user->role === 'guru') {
-                    $redirectUrl = route('guru.dashboard');
-                }
-                if ($user->role === 'siswa') {
-                    $redirectUrl = route('siswa.dashboard');
-                }
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login Berhasil! Selamat datang, '.$user->nama_lengkap,
-                    'confidence' => $output['confidence'],
-                    'redirect' => $redirectUrl,
-                ]);
+            $redirectUrl = route('dashboard');
+            if ($claimedUser->role === 'admin') {
+                $redirectUrl = route('admin.dashboard');
             }
+            if ($claimedUser->role === 'guru') {
+                $redirectUrl = route('guru.dashboard');
+            }
+            if ($claimedUser->role === 'siswa') {
+                $redirectUrl = route('siswa.dashboard');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login Berhasil! Selamat datang, '.$claimedUser->nama_lengkap,
+                'confidence' => $output['confidence'],
+                'redirect' => $redirectUrl,
+            ]);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => $output['message'] ?? 'Wajah tidak dikenali atau tingkat kecocokan rendah.',
-            'confidence' => $output['confidence'] ?? 0,
-        ], 401);
+        return $noMatchResponse;
     }
 }

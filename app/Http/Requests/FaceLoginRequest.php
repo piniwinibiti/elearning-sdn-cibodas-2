@@ -16,6 +16,9 @@ class FaceLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // SENGAJA tanpa exists:users,username — sama seperti LoginRequest,
+            // memvalidasi keberadaan username membocorkan akun mana yang terdaftar.
+            'username' => ['required', 'string', 'max:255'],
             'image' => ['required', 'string', new Base64Image(maxKilobytes: 4096)],
         ];
     }

@@ -9,6 +9,7 @@ use App\Http\Requests\VerifySiswaAuthRequest;
 use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\User;
+use App\Services\FaceDuplicateGuard;
 use App\Services\PythonRunner;
 
 class FaceRecognitionController extends Controller
@@ -279,6 +280,21 @@ class FaceRecognitionController extends Controller
 
         $userId = auth()->id();
         $sample = $validated['sample_count'];
+
+        // Cek duplikat cuma di sample pertama (cukup 1x, hemat panggilan Python).
+        if ($sample === 1) {
+            $conflict = FaceDuplicateGuard::findConflict($validated['image'], $userId);
+            if ($conflict) {
+                $conflictUser = User::find($conflict['user_id']);
+
+                return response()->json([
+                    'success' => false,
+                    'errors' => [
+                        'image' => ['Wajah ini sudah terdaftar atas nama '.($conflictUser->nama_lengkap ?? 'pengguna lain')." (kecocokan {$conflict['confidence']}%). Registrasi dibatalkan untuk mencegah duplikasi. Hubungi admin jika ini adalah kesalahan."],
+                    ],
+                ], 422);
+            }
+        }
 
         // Format: User.[USER_ID].[SAMPLE].jpg
         $fileName = "User.{$userId}.{$sample}.jpg";

@@ -15,6 +15,7 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\FaceDuplicateGuard;
 use App\Services\PythonRunner;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -131,6 +132,13 @@ class AdminController extends Controller
 
         // Simpan Biometrik jika ada
         if ($request->has('face_samples') && count($request->face_samples) > 0) {
+            $conflict = FaceDuplicateGuard::findConflict($request->face_samples[0], $user->id);
+            if ($conflict) {
+                $conflictUser = User::find($conflict['user_id']);
+
+                return back()->with('error', 'Data Guru tersimpan, TAPI wajah yang direkam sudah terdaftar atas nama '.($conflictUser->nama_lengkap ?? 'pengguna lain')." (kecocokan {$conflict['confidence']}%). Biometrik wajah tidak disimpan untuk mencegah duplikasi. Periksa kembali wajah yang direkam lalu ulangi dari menu edit.");
+            }
+
             $datasetPath = storage_path('app/public/dataset');
             if (! file_exists($datasetPath)) {
                 mkdir($datasetPath, 0777, true);
@@ -200,6 +208,13 @@ class AdminController extends Controller
         });
 
         if ($request->has('face_samples') && count($request->face_samples) > 0) {
+            $conflict = FaceDuplicateGuard::findConflict($request->face_samples[0], $user->id);
+            if ($conflict) {
+                $conflictUser = User::find($conflict['user_id']);
+
+                return back()->with('error', 'Data Guru diperbarui, TAPI wajah yang direkam sudah terdaftar atas nama '.($conflictUser->nama_lengkap ?? 'pengguna lain')." (kecocokan {$conflict['confidence']}%). Biometrik wajah lama TIDAK diganti untuk mencegah duplikasi.");
+            }
+
             $datasetPath = storage_path('app/public/dataset');
 
             // Delete old samples
@@ -351,6 +366,13 @@ class AdminController extends Controller
 
         // Simpan Biometrik jika ada
         if ($request->has('face_samples') && count($request->face_samples) > 0) {
+            $conflict = FaceDuplicateGuard::findConflict($request->face_samples[0], $user->id);
+            if ($conflict) {
+                $conflictUser = User::find($conflict['user_id']);
+
+                return back()->with('error', 'Data Siswa tersimpan, TAPI wajah yang direkam sudah terdaftar atas nama '.($conflictUser->nama_lengkap ?? 'pengguna lain')." (kecocokan {$conflict['confidence']}%). Biometrik wajah tidak disimpan untuk mencegah duplikasi. Periksa kembali wajah yang direkam lalu ulangi dari menu edit.");
+            }
+
             $datasetPath = storage_path('app/public/dataset');
             if (! file_exists($datasetPath)) {
                 mkdir($datasetPath, 0777, true);
@@ -408,6 +430,13 @@ class AdminController extends Controller
         });
 
         if ($request->has('face_samples') && count($request->face_samples) > 0) {
+            $conflict = FaceDuplicateGuard::findConflict($request->face_samples[0], $user->id);
+            if ($conflict) {
+                $conflictUser = User::find($conflict['user_id']);
+
+                return back()->with('error', 'Data Siswa diperbarui, TAPI wajah yang direkam sudah terdaftar atas nama '.($conflictUser->nama_lengkap ?? 'pengguna lain')." (kecocokan {$conflict['confidence']}%). Biometrik wajah lama TIDAK diganti untuk mencegah duplikasi.");
+            }
+
             $datasetPath = storage_path('app/public/dataset');
 
             // Delete old samples

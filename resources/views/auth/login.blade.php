@@ -80,7 +80,13 @@
                 </div>
                 <!-- Face Login Tab -->
                 <div class="hidden p-4 rounded-lg bg-transparent" id="face" role="tabpanel" aria-labelledby="face-tab">
-                    
+
+                    <div class="mb-4">
+                        <label for="face-username" class="block mb-2 text-sm font-medium text-gray-700">Username / NIS / NIP</label>
+                        <input type="text" id="face-username" name="username" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors shadow-sm" placeholder="Masukkan username Anda" />
+                        <p class="mt-1 text-xs text-gray-400">Wajah Anda hanya akan dicocokkan dengan akun ini.</p>
+                    </div>
+
                     <div class="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center mb-4 border-2 border-transparent focus-within:border-blue-500">
                         <video id="video-login" autoplay playsinline class="absolute top-0 left-0 w-full h-full object-cover transform scale-x-[-1]"></video>
                         
@@ -206,6 +212,14 @@
 
     // Capture & sending logic remains same
     captureBtn.addEventListener('click', () => {
+        const usernameInput = document.getElementById('face-username');
+        const faceUsername = usernameInput.value.trim();
+        if (!faceUsername) {
+            showStatus("Masukkan Username / NIS / NIP Anda terlebih dahulu.", "error");
+            usernameInput.focus();
+            return;
+        }
+
         showStatus("Memproses wajah Anda...", "loading");
         captureBtn.disabled = true;
         captureBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memindai...';
@@ -230,7 +244,7 @@
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ image: dataUrl })
+            body: JSON.stringify({ image: dataUrl, username: faceUsername })
         })
         .then(async (response) => {
             const data = await response.json();
