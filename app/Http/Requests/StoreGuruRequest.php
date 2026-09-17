@@ -22,7 +22,7 @@ class StoreGuruRequest extends FormRequest
         return [
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'nip' => [
-                'required', 'string', new DigitsOnly('NIP'), 'max:255',
+                'required', 'string', new DigitsOnly('NIP'), 'digits:10',
                 'unique:gurus,nip',
                 function ($attribute, $value, $fail) {
                     if (User::where('username', $value)->exists()) {
@@ -32,7 +32,7 @@ class StoreGuruRequest extends FormRequest
             ],
             'password' => ['required', 'string', 'min:6', 'max:72'],
             'id_kelas_wali' => ['nullable', 'string', 'max:50', 'exists:kelas,nama_kelas'],
-            'mapel_ajar' => ['nullable', 'array'],
+            'mapel_ajar' => ['required', 'array', 'min:1'],
             'mapel_ajar.*' => ['string', 'exists:mapels,nama_mapel'],
             'face_samples' => ['nullable', 'array', 'max:30'],
             'face_samples.*' => [new Base64Image(maxKilobytes: 2048)],
@@ -43,7 +43,10 @@ class StoreGuruRequest extends FormRequest
     {
         return [
             'nip.unique' => 'NIP sudah terdaftar.',
+            'nip.digits' => 'NIP harus tepat 10 digit angka.',
             'id_kelas_wali.exists' => 'Kelas yang dipilih tidak terdaftar.',
+            'mapel_ajar.required' => 'Pilih minimal satu mata pelajaran.',
+            'mapel_ajar.min' => 'Pilih minimal satu mata pelajaran.',
             'mapel_ajar.*.exists' => 'Mata pelajaran yang diajar yang dipilih tidak terdaftar.',
             'face_samples.max' => 'Jumlah sample foto wajah maksimal 30.',
         ];

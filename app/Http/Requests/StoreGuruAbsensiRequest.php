@@ -48,5 +48,14 @@ class StoreGuruAbsensiRequest extends FormRequest
                 }
             }
         });
+
+        $validator->after(function (Validator $validator) {
+            $guru = auth()->user()?->guru;
+            $mapel = $this->input('mapel');
+
+            if ($guru && $mapel && ! $guru->isWali() && ! $guru->mapelOptions()->contains($mapel)) {
+                $validator->errors()->add('mapel', 'Anda tidak mengampu mata pelajaran ini.');
+            }
+        });
     }
 }

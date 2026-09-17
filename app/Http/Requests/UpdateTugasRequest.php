@@ -37,6 +37,18 @@ class UpdateTugasRequest extends FormRequest
         ];
     }
 
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $guru = auth()->user()?->guru;
+            $mapel = $this->input('mata_pelajaran');
+
+            if ($guru && $mapel && ! $guru->isWali() && ! $guru->mapelOptions()->contains($mapel)) {
+                $validator->errors()->add('mata_pelajaran', 'Anda tidak mengampu mata pelajaran ini.');
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

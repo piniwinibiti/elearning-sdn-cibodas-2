@@ -55,6 +55,15 @@ class UpdateMateriRequest extends FormRequest
                 $validator->errors()->add('file_materi', 'Tipe materi Video harus diunggah dengan file MP4 atau MKV.');
             }
         });
+
+        $validator->after(function ($validator) {
+            $guru = auth()->user()?->guru;
+            $mapel = $this->input('mata_pelajaran');
+
+            if ($guru && $mapel && ! $guru->isWali() && ! $guru->mapelOptions()->contains($mapel)) {
+                $validator->errors()->add('mata_pelajaran', 'Anda tidak mengampu mata pelajaran ini.');
+            }
+        });
     }
 
     public function messages(): array

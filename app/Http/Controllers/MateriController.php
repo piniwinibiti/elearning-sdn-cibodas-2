@@ -6,7 +6,6 @@ use App\Http\Requests\BulkDestroyMateriRequest;
 use App\Http\Requests\StoreMateriRequest;
 use App\Http\Requests\UpdateMateriRequest;
 use App\Models\Kelas;
-use App\Models\Mapel;
 use App\Models\Materi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -35,9 +34,9 @@ class MateriController extends Controller
         }
 
         $materis = $query->latest()->paginate(10)->withQueryString();
-        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
         $guru = auth()->user()->guru;
+        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
+        $mapelOptions = $guru->mapelOptions();
 
         return view('guru.materi.index', compact('materis', 'kelasOptions', 'mapelOptions', 'guru'));
     }

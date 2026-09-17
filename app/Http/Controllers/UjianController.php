@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateUjianRequest;
 use App\Models\JawabanUjianEssay;
 use App\Models\JawabanUjianGanda;
 use App\Models\Kelas;
-use App\Models\Mapel;
 use App\Models\SoalUjian;
 use App\Models\Ujian;
 use Exception;
@@ -46,11 +45,10 @@ class UjianController extends Controller
     // ==========================================
     public function indexGuru()
     {
-        $guruId = auth()->user()->guru->id;
-        $ujians = Ujian::withCount('soals')->where('guru_id', $guruId)->latest()->paginate(10);
-        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
         $guru = auth()->user()->guru;
+        $ujians = Ujian::withCount('soals')->where('guru_id', $guru->id)->latest()->paginate(10);
+        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
+        $mapelOptions = $guru->mapelOptions();
 
         return view('guru.ujian.index', compact('ujians', 'kelasOptions', 'mapelOptions', 'guru'));
     }
@@ -59,7 +57,7 @@ class UjianController extends Controller
     {
         $guru = auth()->user()->guru;
         $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
+        $mapelOptions = $guru->mapelOptions();
 
         return view('guru.ujian.create', compact('guru', 'kelasOptions', 'mapelOptions'));
     }
@@ -116,7 +114,7 @@ class UjianController extends Controller
         $ujian = Ujian::with('soals')->where('guru_id', $guru->id)->findOrFail($id);
 
         $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
+        $mapelOptions = $guru->mapelOptions();
 
         return view('guru.ujian.edit', compact('ujian', 'guru', 'kelasOptions', 'mapelOptions'));
     }

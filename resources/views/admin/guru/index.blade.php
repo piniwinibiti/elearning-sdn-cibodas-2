@@ -72,20 +72,25 @@
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 0V4a2 2 0 0 1 2-2h3m0 0v2m0 0h2m-2-2h-2m-2 0H2a2 2 0 0 0-2 2v1"/>
                                 </svg>
                             </div>
-                            <input type="text" id="nip" name="nip" value="{{ old('nip') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Nomor Induk Pegawai" required>
+                            <input type="text" id="nip" name="nip" value="{{ old('nip') }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Nomor Induk Pegawai" title="NIP harus tepat 10 digit angka" required>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Hanya angka, tanpa huruf atau spasi. NIP otomatis digunakan sebagai username.</p>
+                        <p class="text-xs text-gray-500 mt-1">Harus tepat 10 digit angka, tanpa huruf atau spasi. NIP otomatis digunakan sebagai username.</p>
                         <x-input-error name="nip" />
                     </div>
 
-                    <div class="col-span-2 sm:col-span-1">
-                        <label for="mapel_ajar" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran (Opsional)</label>
-                        <select id="mapel_ajar" name="mapel_ajar[]" multiple class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white h-24">
-                            @foreach($mapelOptions as $opt)
-                                <option value="{{ $opt }}" {{ in_array($opt, old('mapel_ajar', [])) ? 'selected' : '' }}>{{ $opt }}</option>
-                            @endforeach
-                        </select>
-                        <p class="text-[10px] text-gray-500 mt-1">Tahan Ctrl / Cmd untuk pilih lebih dari satu.</p>
+                    <div class="col-span-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran <span class="text-red-600">*</span></label>
+                        <div id="mapel-ajar-group" class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-700 max-h-36 overflow-y-auto">
+                            @forelse($mapelOptions as $opt)
+                                <label class="inline-flex items-center px-3 py-1.5 rounded-full border cursor-pointer text-sm select-none transition-colors border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 has-[:checked]:bg-blue-600 has-[:checked]:border-blue-600 has-[:checked]:text-white dark:has-[:checked]:bg-blue-600">
+                                    <input type="checkbox" name="mapel_ajar[]" value="{{ $opt }}" class="mapel-ajar-checkbox sr-only" {{ in_array($opt, old('mapel_ajar', [])) ? 'checked' : '' }}>
+                                    {{ $opt }}
+                                </label>
+                            @empty
+                                <p class="text-sm text-gray-500 italic dark:text-gray-400">Belum ada data mata pelajaran. Tambahkan dulu di menu <span class="font-medium">Mapel</span>.</p>
+                            @endforelse
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-1">Wajib pilih minimal satu mata pelajaran, boleh lebih dari satu.</p>
                         <x-input-error :messages="$errors->get('mapel_ajar')" />
                         <x-input-error :messages="$errors->get('mapel_ajar.*')" />
                     </div>
@@ -238,7 +243,13 @@
                     {{ $guru->user->nama_lengkap }}
                 </th>
                 <td class="px-6 py-4 font-mono">{{ $guru->nip }}</td>
-                <td class="px-6 py-4">{{ $guru->mapel_ajar }}</td>
+                <td class="px-6 py-4">
+                    @forelse($guru->mapels as $mapel)
+                        <span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-1 mb-1 px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">{{ $mapel->nama_mapel }}</span>
+                    @empty
+                        <span class="text-gray-400 italic">-</span>
+                    @endforelse
+                </td>
                 <td class="px-6 py-4">
                     @if($guru->id_kelas_wali)
                         <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Kelas {{ $guru->id_kelas_wali }}</span>
@@ -312,20 +323,26 @@
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">NIP / Username</label>
-                                            <input type="text" name="nip" value="{{ old('nip', $guru->nip) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
-                                            <p class="text-xs text-gray-500 mt-1">Hanya angka. Nilai ini juga menjadi username login guru.</p>
+                                            <input type="text" name="nip" value="{{ old('nip', $guru->nip) }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" title="NIP harus tepat 10 digit angka" required>
+                                            <p class="text-xs text-gray-500 mt-1">Harus tepat 10 digit angka. Nilai ini juga menjadi username login guru.</p>
                                             <x-input-error name="nip" />
                                         </div>
-                                        <div class="col-span-2 sm:col-span-1">
-                                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mapel (Opsional)</label>
-                                            <select name="mapel_ajar[]" multiple class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white h-24">
-                                                @php
-                                                    $guruMapels = $guru->mapels->pluck('nama_mapel')->toArray();
-                                                @endphp
-                                                @foreach($mapelOptions as $opt)
-                                                    <option value="{{ $opt }}" {{ in_array($opt, old('mapel_ajar', $guruMapels)) ? 'selected' : '' }}>{{ $opt }}</option>
-                                                @endforeach
-                                            </select>
+                                        <div class="col-span-2">
+                                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mata Pelajaran <span class="text-red-600">*</span></label>
+                                            @php
+                                                $guruMapels = $guru->mapels->pluck('nama_mapel')->toArray();
+                                            @endphp
+                                            <div class="mapel-ajar-group flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg dark:border-gray-500 bg-gray-50 dark:bg-gray-600 max-h-36 overflow-y-auto">
+                                                @forelse($mapelOptions as $opt)
+                                                    <label class="inline-flex items-center px-3 py-1.5 rounded-full border cursor-pointer text-sm select-none transition-colors border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-400 dark:bg-gray-500 dark:text-gray-100 dark:hover:bg-gray-400 has-[:checked]:bg-blue-600 has-[:checked]:border-blue-600 has-[:checked]:text-white dark:has-[:checked]:bg-blue-600">
+                                                        <input type="checkbox" name="mapel_ajar[]" value="{{ $opt }}" class="mapel-ajar-checkbox sr-only" {{ in_array($opt, old('mapel_ajar', $guruMapels)) ? 'checked' : '' }}>
+                                                        {{ $opt }}
+                                                    </label>
+                                                @empty
+                                                    <p class="text-sm text-gray-500 italic dark:text-gray-300">Belum ada data mata pelajaran. Tambahkan dulu di menu <span class="font-medium">Mapel</span>.</p>
+                                                @endforelse
+                                            </div>
+                                            <p class="text-[10px] text-gray-500 mt-1 dark:text-gray-300">Wajib pilih minimal satu mata pelajaran, boleh lebih dari satu.</p>
                                             <x-input-error :messages="$errors->get('mapel_ajar')" />
                                             <x-input-error :messages="$errors->get('mapel_ajar.*')" />
                                         </div>
@@ -446,6 +463,22 @@
                     checkboxAll.checked = checkedCount === itemCheckboxes.length;
                 }
                 updateBulkDeleteButton();
+            });
+        });
+
+        // Wajib pilih minimal satu mata pelajaran sebelum form guru disubmit
+        document.querySelectorAll('#form-tambah-guru, form[id^="form-edit-guru-"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                const checkedMapel = form.querySelectorAll('.mapel-ajar-checkbox:checked').length;
+                if (checkedMapel === 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Mata Pelajaran Belum Dipilih',
+                        text: 'Pilih minimal satu mata pelajaran untuk guru ini.',
+                        icon: 'warning',
+                        confirmButtonText: 'Oke',
+                    });
+                }
             });
         });
 

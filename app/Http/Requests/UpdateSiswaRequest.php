@@ -26,7 +26,14 @@ class UpdateSiswaRequest extends FormRequest
         return [
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'nis' => [
-                'required', 'string', new DigitsOnly('NIS'), 'max:255',
+                'required', 'string', new DigitsOnly('NIS'),
+                // NIS lama yang belum 15 digit dibiarkan lolos selama tidak diubah,
+                // supaya edit data siswa lama (nama, kelas, dll) tidak ikut terblokir.
+                function ($attribute, $value, $fail) use ($siswa) {
+                    if ($value !== $siswa->nis && strlen($value) !== 15) {
+                        $fail('NIS harus tepat 15 digit angka.');
+                    }
+                },
                 Rule::unique('siswas', 'nis')->ignore($siswa->id),
                 function ($attribute, $value, $fail) use ($siswa) {
                     if (User::where('username', $value)->where('id', '!=', $siswa->user_id)->exists()) {

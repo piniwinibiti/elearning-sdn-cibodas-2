@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateTugasRequest;
 use App\Http\Requests\UploadJawabanTugasRequest;
 use App\Models\JawabanTugas;
 use App\Models\Kelas;
-use App\Models\Mapel;
 use App\Models\Tugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -33,9 +32,9 @@ class TugasController extends Controller
         }
 
         $tugasList = $query->latest()->paginate(12)->withQueryString();
-        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
-        $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
         $guru = auth()->user()->guru;
+        $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
+        $mapelOptions = $guru->mapelOptions();
 
         return view('guru.tugas.index', compact('tugasList', 'kelasOptions', 'mapelOptions', 'guru'));
     }

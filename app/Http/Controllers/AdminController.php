@@ -65,7 +65,7 @@ class AdminController extends Controller
 
     public function indexGuru(Request $request)
     {
-        $query = Guru::with('user');
+        $query = Guru::with(['user', 'mapels']);
 
         // Pencarian (Search)
         if ($request->filled('search')) {

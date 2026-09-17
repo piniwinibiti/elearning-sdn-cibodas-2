@@ -22,7 +22,7 @@ class StoreSiswaRequest extends FormRequest
         return [
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'nis' => [
-                'required', 'string', new DigitsOnly('NIS'), 'max:255',
+                'required', 'string', new DigitsOnly('NIS'), 'digits:15',
                 'unique:siswas,nis',
                 function ($attribute, $value, $fail) {
                     if (User::where('username', $value)->exists()) {
@@ -41,6 +41,7 @@ class StoreSiswaRequest extends FormRequest
     {
         return [
             'nis.unique' => 'NIS sudah terdaftar.',
+            'nis.digits' => 'NIS harus tepat 15 digit angka.',
             'id_kelas.exists' => 'Kelas yang dipilih tidak terdaftar.',
             'face_samples.max' => 'Jumlah sample foto wajah maksimal 30.',
         ];

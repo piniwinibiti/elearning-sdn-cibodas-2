@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Ujian;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -45,6 +46,18 @@ class UpdateUjianRequest extends FormRequest
             'soal.*.opsi_d' => ['required_with:soal', 'string', 'max:500'],
             'soal.*.jawaban_benar' => ['required_with:soal', Rule::in(['A', 'B', 'C', 'D'])],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $guru = auth()->user()?->guru;
+            $mapel = $this->input('mata_pelajaran');
+
+            if ($guru && $mapel && ! $guru->isWali() && ! $guru->mapelOptions()->contains($mapel)) {
+                $validator->errors()->add('mata_pelajaran', 'Anda tidak mengampu mata pelajaran ini.');
+            }
+        });
     }
 
     public function messages(): array

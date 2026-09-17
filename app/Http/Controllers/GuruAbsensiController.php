@@ -8,7 +8,6 @@ use App\Http\Requests\StoreGuruAbsensiRequest;
 use App\Models\Absensi;
 use App\Models\Jadwal;
 use App\Models\Kelas;
-use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Services\PythonRunner;
 use Illuminate\Http\Request;
@@ -41,25 +40,13 @@ class GuruAbsensiController extends Controller
         // Options
         $kelasOptions = Kelas::orderBy('nama_kelas')->pluck('nama_kelas');
 
-        if ($isWali) {
-            // Wali Kelas can pick any subject for their class
-            $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
-        } else {
-            // Bidang Guru can only pick their assigned subjects
-            $mapelOptions = $guru->mapels()->pluck('nama_mapel');
+        // Wali Kelas boleh pilih mapel apa saja untuk kelasnya; guru bidang studi
+        // dibatasi hanya mapel yang di-assign admin (lihat Guru::mapelOptions()).
+        $mapelOptions = $guru->mapelOptions();
 
-            // Fallback: Jika relasi kosong (misal data lama), coba parse dari string mapel_ajar
-            if ($mapelOptions->isEmpty() && ! empty($guru->mapel_ajar) && $guru->mapel_ajar !== '-') {
-                $mapelOptions = collect(explode(',', $guru->mapel_ajar))->map(fn ($m) => trim($m))->filter();
-            }
-
-            // AUTO-SELECT: If subject teacher has exactly 1 subject, use it as default
-            if ($mapelOptions->count() === 1) {
-                $selectedMapel = $selectedMapel ?? $mapelOptions->first();
-            } elseif ($mapelOptions->isEmpty()) {
-                // Last fallback: tampilkan semua mapel jika tetap tidak ada
-                $mapelOptions = Mapel::orderBy('nama_mapel')->pluck('nama_mapel');
-            }
+        // AUTO-SELECT: Jika guru bidang studi hanya punya 1 mapel, jadikan default
+        if (! $isWali && $mapelOptions->count() === 1) {
+            $selectedMapel = $selectedMapel ?? $mapelOptions->first();
         }
 
         $siswas = [];
