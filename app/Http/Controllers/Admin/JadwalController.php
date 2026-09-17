@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreJadwalRequest;
 use App\Http\Requests\UpdateJadwalRequest;
 use App\Models\Guru;
-use App\Models\GuruMapel;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
@@ -16,9 +15,9 @@ class JadwalController extends Controller
 {
     public function getGuruMapels($id)
     {
-        $mapels = GuruMapel::where('guru_id', $id)->pluck('nama_mapel');
+        $guru = Guru::findOrFail($id);
 
-        return response()->json($mapels);
+        return response()->json($guru->mapelOptions());
     }
 
     public function index(Request $request)
