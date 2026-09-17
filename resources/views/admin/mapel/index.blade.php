@@ -113,50 +113,50 @@
                                     </button>
                                 </form>
                             </div>
+
+                            <!-- Modal Edit -->
+                            <div id="editMapelModal-{{ $mapel->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                <div class="relative w-full max-w-md max-h-full">
+                                    <form action="{{ route('admin.mapel.update', $mapel->id) }}" method="POST" class="relative bg-white rounded-3xl shadow-2xl dark:bg-gray-800 border-0 overflow-hidden">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 flex justify-between items-center">
+                                            <div class="flex items-center space-x-3 text-white">
+                                                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                </div>
+                                                <h3 class="text-xl font-bold">Edit Mapel</h3>
+                                            </div>
+                                            <button type="button" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-1.5 transition-colors" data-modal-toggle="editMapelModal-{{ $mapel->id }}">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        </div>
+                                        <div class="p-8 space-y-5">
+                                            <div>
+                                                <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kode Mapel</label>
+                                                <input type="text" name="kode" value="{{ old('kode', $mapel->kode) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-mono font-bold" placeholder="MISAL: MTK" required>
+                                                <x-input-error name="kode" />
+                                            </div>
+                                            <div>
+                                                <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nama Mata Pelajaran</label>
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                                    </div>
+                                                    <input type="text" name="nama_mapel" value="{{ old('nama_mapel', $mapel->nama_mapel) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 pl-12 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-semibold" required>
+                                                </div>
+                                                <x-input-error name="nama_mapel" />
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <button type="submit" class="flex-1 text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 focus:ring-4 focus:ring-amber-200 font-bold rounded-2xl text-base px-6 py-4 text-center transition-all shadow-lg active:scale-95">Simpan Perubahan</button>
+                                                <button data-modal-toggle="editMapelModal-{{ $mapel->id }}" type="button" class="px-6 py-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-2xl transition-all border border-transparent hover:border-gray-200">Batal</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </td>
                     </tr>
-
-                    <!-- Modal Edit -->
-                    <div id="editMapelModal-{{ $mapel->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                        <div class="relative w-full max-w-md max-h-full">
-                            <form action="{{ route('admin.mapel.update', $mapel->id) }}" method="POST" class="relative bg-white rounded-3xl shadow-2xl dark:bg-gray-800 border-0 overflow-hidden">
-                                @csrf
-                                @method('PUT')
-                                <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 flex justify-between items-center">
-                                    <div class="flex items-center space-x-3 text-white">
-                                        <div class="p-2 bg-white/20 rounded-xl backdrop-blur-md">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                        </div>
-                                        <h3 class="text-xl font-bold">Edit Mapel</h3>
-                                    </div>
-                                    <button type="button" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-1.5 transition-colors" data-modal-toggle="editMapelModal-{{ $mapel->id }}">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </button>
-                                </div>
-                                <div class="p-8 space-y-5">
-                                    <div>
-                                        <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kode Mapel</label>
-                                        <input type="text" name="kode" value="{{ old('kode', $mapel->kode) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-mono font-bold" placeholder="MISAL: MTK" required>
-                                        <x-input-error name="kode" />
-                                    </div>
-                                    <div>
-                                        <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nama Mata Pelajaran</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                                            </div>
-                                            <input type="text" name="nama_mapel" value="{{ old('nama_mapel', $mapel->nama_mapel) }}" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-amber-500 focus:border-amber-500 block w-full p-4 pl-12 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-inner uppercase font-semibold" required>
-                                        </div>
-                                        <x-input-error name="nama_mapel" />
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <button type="submit" class="flex-1 text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 focus:ring-4 focus:ring-amber-200 font-bold rounded-2xl text-base px-6 py-4 text-center transition-all shadow-lg active:scale-95">Simpan Perubahan</button>
-                                        <button data-modal-toggle="editMapelModal-{{ $mapel->id }}" type="button" class="px-6 py-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-2xl transition-all border border-transparent hover:border-gray-200">Batal</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                     @empty
                     <tr>
                         <td colspan="4" class="px-8 py-20 text-center">
