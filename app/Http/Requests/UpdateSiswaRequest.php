@@ -27,11 +27,11 @@ class UpdateSiswaRequest extends FormRequest
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'nis' => [
                 'required', 'string', new DigitsOnly('NIS'),
-                // NIS lama yang belum 15 digit dibiarkan lolos selama tidak diubah,
+                // NIS lama yang belum 10 digit dibiarkan lolos selama tidak diubah,
                 // supaya edit data siswa lama (nama, kelas, dll) tidak ikut terblokir.
                 function ($attribute, $value, $fail) use ($siswa) {
-                    if ($value !== $siswa->nis && strlen($value) !== 15) {
-                        $fail('NIS harus tepat 15 digit angka.');
+                    if ($value !== $siswa->nis && strlen($value) !== 10) {
+                        $fail('NIS harus tepat 10 digit angka.');
                     }
                 },
                 Rule::unique('siswas', 'nis')->ignore($siswa->id),

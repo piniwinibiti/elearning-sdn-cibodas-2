@@ -72,9 +72,9 @@
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 0V4a2 2 0 0 1 2-2h3m0 0v2m0 0h2m-2-2h-2m-2 0H2a2 2 0 0 0-2 2v1"/>
                                     </svg>
                                 </div>
-                                <input type="text" id="nis" name="nis" value="{{ old('nis') }}" inputmode="numeric" pattern="[0-9]{15}" maxlength="15" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" title="NIS harus tepat 15 digit angka" required>
+                                <input type="text" id="nis" name="nis" value="{{ old('nis') }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" title="NIS harus tepat 10 digit angka" required>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Harus tepat 15 digit angka, tanpa huruf atau spasi. NIS otomatis digunakan sebagai username.</p>
+                            <p class="text-xs text-gray-500 mt-1">Harus tepat 10 digit angka, tanpa huruf atau spasi. NIS otomatis digunakan sebagai username.</p>
                             <x-input-error name="nis" />
                         </div>
 
@@ -277,7 +277,7 @@
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">NIS / Username</label>
-                                            <input type="text" name="nis" value="{{ old('nis', $siswa->nis) }}" inputmode="numeric" pattern="[0-9]{15}" maxlength="15" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" title="NIS harus tepat 15 digit angka" required>
+                                            <input type="text" name="nis" value="{{ old('nis', $siswa->nis) }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" title="NIS harus tepat 10 digit angka" required>
                                             <p class="text-xs text-gray-500 mt-1">Harus tepat 15 digit angka. Nilai ini juga menjadi username login siswa.</p>
                                             <x-input-error name="nis" />
                                         </div>
